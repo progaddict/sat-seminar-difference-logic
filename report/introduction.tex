@@ -1,0 +1,87 @@
+\section{Introduction}
+\label{sec:introduction}
+Introduction into the topic (1-2 pages).
+
+
+
+\subsection{Difference Logic}
+Definition of difference logic + examples of valid and invalid
+formulas.
+\begin{definition}[Difference Logic]
+    \label{def:differenceLogic}
+    Let $ \mathcal{P} = \{p_1, p_2, \ldots, p_n \} $ be ... (take definition from the main article~\cite{cotton2004some})
+\end{definition}
+A valid formula:
+\begin{equation*}
+    \phi_{\mathrm{valid}} = (x_1 - x_2 < 5)
+    \land (x_1-x_3 \leq 7)
+    \land (x_5 = -15)
+    \land (x_1-x_5 < 10 \lor x_5-x_3 < -3)
+\end{equation*}
+and examples of invalid one is:
+\begin{equation*}
+    \phi_{\mathrm{invalid~1}} = (x_1 - x_2 < 5)
+    \land (x_1-x_3 \leq \pi)
+\end{equation*}
+Because  $ \pi \notin \mathbb{Z} $.
+Though, in practice (\ie for the real life applications) it is
+usually possible to round $ \pi $ to
+\eg 3.14 and then multiply both part of the equation by 100
+and then introduce new variables:
+\begin{equation*}
+    \begin{aligned}
+        x_1-x_3 \leq 3.14 \\
+        100 x_1 - 100 x_3 \leq 314 \\
+        x_1' - x_3' \leq 314 \\
+        \mathrm{where} \; x_1' = 100 x_1 \;
+        \mathrm{and} \; x_3' = 100 x_3
+    \end{aligned}
+\end{equation*}
+Another one:
+\begin{equation*}
+    \phi_{\mathrm{invalid~2}} = x_1 + x_2 < 5
+\end{equation*}
+Because here we have addition.
+Although, the reader can spot that it is possible to introduce
+a new variable $ x_2' = -x_2 $ and turn
+$ \phi_{\mathrm{invalid~2}} $ into a valid formula.
+Yet another one:
+\begin{equation*}
+    \phi_{\mathrm{invalid~3}} = x_1 x_2 < 25
+\end{equation*}
+Because multiplication, division, exponentiation \etc are not
+covered by the Difference Logic. Only difference of two variables
+is valid.
+Difference of more than two variable is not covered either:
+\begin{equation*}
+    \phi_{\mathrm{invalid~4}} = x_1 - x_2 - x_3 < 250
+\end{equation*}
+In such cases one should try to transform the "invalid" formula
+into a valid "canonical" one by introducing new variables
+(in the above's case it can be \eg $ x_2' = x_2 + x_3 $),
+multiplying left and right side of the inequality by some
+value \etc
+
+
+
+\subsection{General Approach to SAT Solving}
+Describe here the general approach to SAT solving presented
+in the main paper~\cite{cotton2004some} (procedure Solve,
+DPLL algorithm, generic scheme of tandem of SAT Solver
++ Theory Solver).
+It is a good idea to include some picture/diagram describing
+the DPLL approach (\eg a block scheme of the algorithm/procedure).
+Maybe it is also a good idea to give a simple example.
+Give definitions: implication graph, unique implication point.
+
+
+
+\subsection{Approaches to Solve SAT of Difference Logic}
+Shortly describe possible approaches (their core ideas)
+to solve DL SAT problem.
+According to the main article~\cite{cotton2004some}, they are:
+\begin{itemize}
+    \item The lazy approach
+    \item The preprocessing approach
+    \item Incremental approaches
+\end{itemize}

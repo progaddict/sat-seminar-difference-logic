@@ -1,0 +1,11 @@
+\begin{tikzpicture}[scale=0.9, 
+				    state/.style={draw, rounded corners, fill=none,
+				    			  text centered, text=black}]
+	\node[state] (v1) at (0, 0) {$v_1$};
+	\node[state] (v2) at (1, 1) {$v_2$};
+	\node[state] (v3) at (2, 0) {$v_3$};
+	\path[->] 	(v1)  edge 				node[] {} (v2)
+				(v2)  edge[loop above] 	node[] {} (v2) 
+				(v2)  edge 				node[] {} (v3)
+				(v3)  edge 				node[] {} (v1);
+\end{tikzpicture}
