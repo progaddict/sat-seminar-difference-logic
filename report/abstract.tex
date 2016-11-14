@@ -1,5 +1,22 @@
 \begin{abstract}
-	Short abstract. Motivation is important: where the Difference
-    Logic (DL) can be used? (circuits checking, scheduling problems
-    \etc)
+    This report describes the difference logic (DL) and a graph-based
+    approach for solving satisfiability (SAT) problem of DL formulas.
+    There is of course a simplex-based algorithm which solves
+    SAT problem of any linear arithmetic (LA) constraints.
+    However, it is not efficient compared to the algorithm described in
+    the report because simplex does not utilize the simple structure of
+    DL constraints.
+
+    Efficiently solving SAT problem of DL constraints is very
+    important because a lot of timing related problems can be described
+    by this logic \eg scheduling problems, detecting race conditions
+    in digital circuits \etc
+
+    The report is organized as follows.
+    Chapter~\ref{sec:introduction} introduces difference logic and
+    SAT checking.
+    Chapter~\ref{sec:preliminaries} gives theoretical background.
+    Chapter~\ref{sec:topic} describes a graph-based approach to solving
+    SAT problem of DL.
+    Chapter~\ref{sec:conclusion} draws a conclusion.
 \end{abstract}

@@ -1,70 +1,54 @@
 \section{Introduction}
 \label{sec:introduction}
-Introduction into the topic (1-2 pages).
 
 
 
 \subsection{Difference Logic}
-Definition of difference logic + examples of valid and invalid
-formulas.
+\label{sec:difference-logic}
+DL is a special case of an LA logic in which
+all LA constraints have the form $ x - y \prec c $ where
+$ x $ and $ y $ are numerical variables, $ c $ is a constant
+and $ \prec \in \{<, \leq \} $ is a comparison operator.
+A more formal definition of DL is given
+below~\cite{cotton2004some, mahfoudh2003verification}:
 \begin{definition}[Difference Logic]
     \label{def:differenceLogic}
-    Let $ \mathcal{P} = \{p_1, p_2, \ldots, p_n \} $ be ... (take definition from the main article~\cite{cotton2004some})
+    Let $ \mathcal{B} = \{ b_1, b_2, \dots \} $ be a set of Boolean
+    variables and $ \mathcal{X} = \{ x_1, x_2, \dots \} $ be a set
+    of numerical variables. The difference logic over
+    $ \mathcal{B} $ and $ \mathcal{X} $ is called
+    $ DL(\mathcal{X},\mathcal{B}) $ and given by the following grammar:
+    \begin{equation*}
+        \phi \eqbydef b \; | \; (x - y < c) \; | \; \neg \phi \; | \;
+        \phi \land \phi
+    \end{equation*}
+    where $ b \in \mathcal{B} $, $ x,y \in \mathcal{X} $ and
+    $ c \in \mathbb{D} $ is a constant. The domain $ \mathbb{D} $ is
+    either the integers $ \mathbb{Z} $ or the real numbers $ \mathbb{R} $.
+    \\
+    The remaining Boolean connectives
+    $ \lor, \rightarrow, \leftrightarrow, \dots $ can be defined in
+    the usual ways in terms of conjunction and negation.
 \end{definition}
-A valid formula:
-\begin{equation*}
-    \phi_{\mathrm{valid}} = (x_1 - x_2 < 5)
-    \land (x_1-x_3 \leq 7)
-    \land (x_5 = -15)
-    \land (x_1-x_5 < 10 \lor x_5-x_3 < -3)
-\end{equation*}
-and examples of invalid one is:
-\begin{equation*}
-    \phi_{\mathrm{invalid~1}} = (x_1 - x_2 < 5)
-    \land (x_1-x_3 \leq \pi)
-\end{equation*}
-Because  $ \pi \notin \mathbb{Z} $.
-Though, in practice (\ie for the real life applications) it is
-usually possible to round $ \pi $ to
-\eg 3.14 and then multiply both part of the equation by 100
-and then introduce new variables:
-\begin{equation*}
-    \begin{aligned}
-        x_1-x_3 \leq 3.14 \\
-        100 x_1 - 100 x_3 \leq 314 \\
-        x_1' - x_3' \leq 314 \\
-        \mathrm{where} \; x_1' = 100 x_1 \;
-        \mathrm{and} \; x_3' = 100 x_3
-    \end{aligned}
-\end{equation*}
-Another one:
-\begin{equation*}
-    \phi_{\mathrm{invalid~2}} = x_1 + x_2 < 5
-\end{equation*}
-Because here we have addition.
-Although, the reader can spot that it is possible to introduce
-a new variable $ x_2' = -x_2 $ and turn
-$ \phi_{\mathrm{invalid~2}} $ into a valid formula.
-Yet another one:
-\begin{equation*}
-    \phi_{\mathrm{invalid~3}} = x_1 x_2 < 25
-\end{equation*}
-Because multiplication, division, exponentiation \etc are not
-covered by the Difference Logic. Only difference of two variables
-is valid.
-Difference of more than two variable is not covered either:
-\begin{equation*}
-    \phi_{\mathrm{invalid~4}} = x_1 - x_2 - x_3 < 250
-\end{equation*}
-In such cases one should try to transform the "invalid" formula
-into a valid "canonical" one by introducing new variables
-(in the above's case it can be \eg $ x_2' = x_2 + x_3 $),
-multiplying left and right side of the inequality by some
-value \etc
+Examples of DL formulas are given below:
+\begin{equation}
+    \label{eq:example-1}
+    f_1 = (p \lor q \lor r) \land (p \rightarrow (u - v < 3)) \land
+    (q \rightarrow (v - w < -5)) \land (r \rightarrow (w - x < 0))
+\end{equation}
+\begin{equation}
+    \label{eq:example-2}
+    f_2 = () \ land ()
+\end{equation}
+\begin{equation}
+    \label{eq:example-3}
+    f_3 = ()
+\end{equation}
 
 
 
-\subsection{General Approach to SAT Solving}
+\subsection{Solving SAT Problem of Propositional Logic}
+The satisfiability (SAT) checking problem 
 Describe here the general approach to SAT solving presented
 in the main paper~\cite{cotton2004some} (procedure Solve,
 DPLL algorithm, generic scheme of tandem of SAT Solver
@@ -73,10 +57,19 @@ It is a good idea to include some picture/diagram describing
 the DPLL approach (\eg a block scheme of the algorithm/procedure).
 Maybe it is also a good idea to give a simple example.
 Give definitions: implication graph, unique implication point.
+\begin{definition}[Implication Graph]
+    def
+\end{definition}
+\begin{definition}[Implication Point]
+    def
+\end{definition}
+\begin{definition}[Unique Implication Point]
+    def
+\end{definition}
 
 
 
-\subsection{Approaches to Solve SAT of Difference Logic}
+\subsection{Solving SAT Problem of Difference Logic}
 Shortly describe possible approaches (their core ideas)
 to solve DL SAT problem.
 According to the main article~\cite{cotton2004some}, they are:
