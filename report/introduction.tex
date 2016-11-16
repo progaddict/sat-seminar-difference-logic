@@ -54,11 +54,11 @@ algorithm~\cite{davis1960computing, davis1962machine}
 for solving SAT problem of the propositional logic (PL).
 One such basic SAT checking algorithm is given below:
 \begin{Algorithm}
-    \label{alg:basic-sat}
     \caption{A basic SAT checking algorithm for solving SAT problem of PL.
         It takes a PL formula to be checked for satisfiability and
         returns SAT status of the formula (SAT or UNSAT)
         and, in case when the formula is SAT, a model \ie an assignment, which evaluates the formula to $ True $.}
+    \label{alg:basic-sat}
     \begin{algorithm}{\text{(SAT Status, Model) Check}}
         {\text{PL formula} \phi}
         model \= \varnothing \\
@@ -93,7 +93,8 @@ One such basic SAT checking algorithm is given below:
     \end{algorithm}
 \end{Algorithm}
 
-The given above algorithm is quite generic, it is more of a template.
+The given above Algorithm~\ref{alg:basic-sat} is quite generic,
+it is more of a template.
 One needs to plug into this template his own implementations of the
 following functions:
 \begin{itemize}
@@ -214,10 +215,10 @@ the $ \algCALL{Propagate} $) \etc
 
 
 \subsection{Solving SAT Problem of Difference Logic}
-As mentioned in~\cite{cotton2004some, mahfoudh2003verification} 
-According to the main article, they are:
+As mentioned in~\cite{cotton2004some} the following main approaches are used for
+solving the SAT problem of DL:
 \begin{itemize}
-    \item The lazy approach
-    \item The preprocessing approach
-    \item Incremental approaches
+    \item Lazy approach. The input DL formula is transformed into
+    \item Preprocessing approach.
+    \item Incremental approach. test
 \end{itemize}
