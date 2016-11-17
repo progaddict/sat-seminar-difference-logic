@@ -1,0 +1,21 @@
+\begin{tikzpicture}
+
+\tikzstyle{block} = [draw, rectangle]
+
+\node [draw, ellipse] (dl) {$ \phi $ in DL};
+\node [block, below = 0.85cm of dl] (pl) {$ \phi' $ in PL};
+\node [block, below = 0.5cm of pl] (sat-solver) {SAT Solver};
+\node [block, below left = 1cm and 0.3cm of sat-solver, text width=1.5cm, align=center] (model) {Partial Solution};
+\node [block, below right = 1cm and -1cm of sat-solver, text width=3cm, align=center] (explanation) {Partial SAT or UNSAT + Explanation};
+\node [block, below = 3cm of sat-solver, text width=4cm, align=center] (theory-solver) {DL Constrains Checker (Theory Solver)};
+\node [draw, circle, inner sep=0pt, text width=1.5cm, align=center, right = 2.5cm of pl] (sat) {$ \phi $ is SAT/UNSAT};
+
+\draw [->] (dl) -- node[anchor=east, name=substitution] {$ x - y < c \eqbydef p_{xyc} $} (pl);
+\draw [->] (pl) -- (sat-solver);
+\draw [->] (substitution) edge[bend right=70] node[anchor=south, sloped] {mapping} (theory-solver);
+\draw [-] (sat-solver.west) edge[bend right=50] (model);
+\draw [->] (model) edge[bend right=20] (theory-solver);
+\draw [-] (theory-solver.east) edge[bend right=30] (explanation);
+\draw [->] (explanation) edge[bend right=20] (sat-solver);
+\draw [->] (sat-solver) edge[bend right=30] node[anchor=south, text width=2cm, align=center] {Solution or UNSAT} (sat);
+\end{tikzpicture}
