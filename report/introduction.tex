@@ -11,7 +11,6 @@ and $ \prec \in \{<, \leq \} $ is a comparison operator.
 A more formal definition of DL is given
 below~\cite{cotton2004some},~\cite[p.5]{mahfoudh2003verification}:
 \begin{definition}[Difference Logic]
-    \label{def:differenceLogic}
     Let $ \mathcal{B} = \{ b_1, b_2, \dots \} $ be a set of Boolean
     variables and $ \mathcal{X} = \{ x_1, x_2, \dots \} $ be a set
     of numerical variables. The difference logic over
@@ -30,7 +29,6 @@ below~\cite{cotton2004some},~\cite[p.5]{mahfoudh2003verification}:
     the usual ways in terms of conjunction and negation.
 \end{definition}
 Examples of DL formulas are given below:
-% TODO: add two more examples and use them further in the report
 \begin{equation}
     \label{eq:example-1}
     \phi_1 = (p \lor q \lor r) \land (p \rightarrow (u - v < 3)) \land
@@ -38,11 +36,21 @@ Examples of DL formulas are given below:
 \end{equation}
 \begin{equation}
     \label{eq:example-2}
-    \phi_2 = (a) \land (b)
+    \phi_2 = (u-v < 1)
+        \land (v-w < 5)
+        \land (w-x \leq -3)
+        \land (x-y < 1)
+        \land (y-z \leq -5)
+        \land (y-v \leq 0)
 \end{equation}
 \begin{equation}
     \label{eq:example-3}
-    \phi_3 = (c)
+    \phi_3 = (u-v < 1)
+        \land (v-w < 5)
+        \land (w-x \leq -3)
+        \land (x-y < -3)
+        \land (y-z \leq -5)
+        \land (y-w < 4)
 \end{equation}
 
 
@@ -132,8 +140,8 @@ following functions:
         \end{aligned}
     \end{equation}
     \item[$ \algCALL{Decide} $] This function takes a PL formula
-    and a model and, by applying some heuristic, selects a variable and a
-    value for it and returns them.
+    and a model. Then, by applying some heuristic, it
+    selects a variable and a value for it and returns them.
     The returned variable and value describe an update to the model.
     They basically correspond to a subtree in which the
     Algorithm~\ref{alg:basic-sat} should look for the solution.
@@ -242,6 +250,7 @@ solving the SAT problem of DL:
     dependencies between DL constraints in PL.
     An example of such a dependency could be transitivity:
     \begin{equation}
+        \label{eq:transitivity-example}
         (x-y<a) \land (y-z<b) \rightarrow (x-z<a+b)
     \end{equation}
     After the transformation a SAT solver can be used to check SAT of
@@ -275,9 +284,10 @@ solving the SAT problem of DL:
     In this approach a SAT solver and a DL constraints checker also work
     in tandem.
     However, instead of solving the whole formula and then giving a
-    complete answer to the DL constraints checker, the SAT solver asks
-    the DL constraints checker each time it makes a decision.
+    complete answer to the DL constraints checker, the SAT solver invokes
+    the DL constraints checker each time it updates its model.
     The DL constraints checker should be able to maintain some internal
     state of the currently received DL constraints and update it
-    incrementally. Hence the name of the approach.
+    incrementally (\ie add new constraints, delete existing ones).
+    Hence the name of the approach.
 \end{itemize}

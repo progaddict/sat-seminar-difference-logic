@@ -3,11 +3,55 @@
 
 
 
-\subsection{Constraint Graph (CG)}
-Give definition of Constraint Graph and an example.
-Tell also about Difference Bound Matrix (DBM).
-Allude to the fact that SAT problem can be described in terms
-of a testing a CG on a negative cycle.
+\subsection{Constraint Graph}
+\begin{figure}[htb]
+    \begin{center}
+        \begin{tabular}{cc}
+            \begin{minipage}{0.45\linewidth}
+                \begin{center}
+                    \input{pictures/fig-example-cg-1.tex}
+                \end{center}
+            \end{minipage}
+            &
+            \begin{minipage}{0.45\linewidth}
+                \begin{center}
+                    \input{pictures/fig-example-cg-2.tex}
+                \end{center}
+            \end{minipage}
+        \end{tabular}
+    \end{center}
+    \caption{Examples of constraint graphs for
+        Equation~\ref{eq:example-2} (left) and
+        Equation~\ref{eq:example-3} (right).}
+    \label{fig:contraints-graphs}
+\end{figure}
+Constraint Graph (Figure~\ref{fig:contraints-graphs})
+is used by the DL constraints checker
+(Figure~\ref{fig:lazy-and-incremental-approaches}).
+It represents the DL constraints and allows calculate transitivity
+relations between them (\eg Equation~\ref{eq:transitivity-example}).
+According to~\cite{cotton2004some} this graph is defined as follows:
+\begin{definition}[Constraint Graph]
+    The constraint graph of a set (or conjunction) of
+    DL constraints $ \Gamma $ is a graph $ \Gamma = (V,E,\xi) $
+    with one vertex per numeric variable occurring in some DL
+    constraint in $ \Gamma $, edges
+    $ E = \{(x,y): (x - y \prec c) \in \Gamma \; for \; some \; (\prec, c) \in B \}$
+    and a function $ \xi: E \mapsto B $ defined
+    by $ (x,y) \mapsto \min\{(\prec, c) : (x-y \prec c) \in \Gamma\} $.
+\end{definition}
+Where $ \prec \in \{ <, \leq \} $,
+$ B = \{ (\prec, c) \} $ is a set of bounds.
+On $ B $ an order is defined as follows:
+$ (\prec, c) <_B (\prec', c') $ when $ c < c' $
+or when $ c = c' $ and $ \prec $ is $ < $ and $ \prec' $ is $ \leq $.
+A couple of examples are given below:
+\begin{equation}
+    \begin{aligned}
+        (\leq, -3) <_B (<, -1) \\
+        (<, -1) <_B (\leq, -1) \\
+    \end{aligned}
+\end{equation}
 
 
 
