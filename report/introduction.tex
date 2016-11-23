@@ -105,6 +105,7 @@ The given above Algorithm~\ref{alg:basic-sat} is quite generic,
 it is more of a template.
 One needs to plug into this template his own implementations of the
 following functions:
+
 \begin{itemize}
     \item[$ \algCALL{Propagate} $] This function takes a PL formula
     and a model and returns all assignments that follow from
@@ -112,104 +113,17 @@ following functions:
     It also returns a list of conflicting clauses (if there are any).
     These clauses will be in conflict with the model if one extends
     the model by applying the returned assignments.
-    A couple of examples are given below:
-    \begin{equation}
-        \begin{aligned}
-            \phi = a \land b \land (c \lor d) \\
-            model = \varnothing \\
-            \algCALL{Propagate}(\phi, model)
-            = (\{ a = True, b = True \}, \varnothing) \\
-        \end{aligned}
-    \end{equation}
-    \begin{equation}
-        \begin{aligned}
-            \phi = (a \lor b \lor c) \land (\neg c \lor d)
-                \land (\neg d \lor a \lor e) \\
-            model = \{ a = False, b = False \} \\
-            \algCALL{Propagate}(\phi, model)
-                = (\{ c = True, d = True, e = True \}, \varnothing) \\
-        \end{aligned}
-    \end{equation}
-    \begin{equation}
-        \begin{aligned}
-            \phi = (a \lor b \lor c) \land (\neg c \lor d)
-                \land (\neg d \lor a) \\
-            model = \{ a = False, b = False \} \\
-            \algCALL{Propagate}(\phi, model)
-                = (\{ c = True, d = True \}, \{ (\neg d \lor a) \}) \\
-        \end{aligned}
-    \end{equation}
     \item[$ \algCALL{Decide} $] This function takes a PL formula
     and a model. Then, by applying some heuristic, it
     selects a variable and a value for it and returns them.
-    The returned variable and value describe an update to the model.
-    They basically correspond to a subtree in which the
-    Algorithm~\ref{alg:basic-sat} should look for the solution.
-    The whole tree represents the model space.
-    The leaves of the tree correspond to particular models.
-    If all variables in the model have been already assigned the
-    function should return $ \algNIL $ as the next variable.
-    An example is given below:
-    \begin{figure}[htb]
-        \begin{center}
-            \begin{tabular}{cc}
-                \begin{minipage}{0.45\linewidth}
-                    \begin{center}
-                        \begin{equation}
-                        \label{eq:decide-example}
-                        \begin{aligned}
-                            \phi = (a \lor \neg b \lor c) \lor (b \lor \neg c \lor \neg a) \\
-                            model = \{ a = True \} \\
-                            \algCALL{Decide}(\phi, model) = (b, False) \\
-                        \end{aligned}
-                        \end{equation}
-                    \end{center}
-                \end{minipage}
-                &
-                \begin{minipage}{0.50\linewidth}
-                    \begin{center}
-                        \input{pictures/fig-example-decide.tex}
-                    \end{center}
-                \end{minipage}
-            \end{tabular}
-        \end{center}
-        \caption{A example of a decision over a PL formula
-            (Equation~\ref{eq:decide-example} on the left)
-            and the corresponding model space (on the right).
-            The solid edge from $ a $ to $ b $ corresponds to the current
-            model ($ model $ in~Equation~\ref{eq:decide-example}).
-            The dashed edge from $ b $ to $ c $ corresponds to the decision
-            $ (b, False) $ returned by the $ \algCALL{Decide}(\phi, model) $.
-            The leaves $ m_1, m_2, \dots, m_8 $ correspond to models \eg $ m_3 $ corresponds to the model $ \{ a=False, b=True, c=False \} $.}
-    \end{figure}
     \item[\algCALL{Resolve}] This function takes a PL formula, current
     conflicting model and a list of the clauses which are in the conflict
     with the current model.
     It returns a new model which does not have the conflict and an assertion clause
     $ \phi_a $ (or a conjunction of assertion clauses) which carries the knowledge
     about the resolved conflict.
-    The assertion clause evaluates to $ False $ when the same model is used that caused
-    the conflict.
-    It causes the updated PL formula ($ \phi \land \phi_a $) to also evaluate
-    to $ False $ and makes sure the solver will not run into this
-    particular conflict again.
-    The function should also make sure that the returned conflict-free model
-    should be distinct from the models, which have already been processed before.
-    Otherwise, the Algorithm~\ref{alg:basic-sat} might fall into an infinite loop.
     If the conflict cannot be resolved, the function returns $ \algNIL $ as
     the model.
-    An example is given below:
-    \begin{equation}
-        \begin{aligned}
-            \phi = (a \lor b \lor c) \land (\neg c \lor d) \land (\neg d \lor a) \\
-            model = \{ a = False, b = False, c = True, d = True \} \\
-            conflictingClauses = \{ (\neg d \lor a) \} \\
-            \begin{split}
-                \algCALL{Resolve}(\phi, model, conflictingClauses) = \\
-                & ( \; \{ a = False \}, \; \{ (a \lor b) \} \; )
-            \end{split}
-        \end{aligned}
-    \end{equation}
 \end{itemize}
 
 In the described above Algorithm~\ref{alg:basic-sat} a model is represented by
@@ -244,6 +158,7 @@ the $ \algCALL{Propagate} $) \etc
 \end{figure}
 As mentioned in~\cite{cotton2004some} the following main approaches are used for
 solving the SAT problem of DL:
+
 \begin{itemize}
     \item Preprocessing approach. This approach suggests transforming a DL
     formula into an equivalent PL formula by encoding all intrinsic
@@ -261,27 +176,16 @@ solving the SAT problem of DL:
     (Figure~\ref{fig:lazy-and-incremental-approaches} left).
     This approach suggests substituting each DL constraint $ x-y<c $ with
     a Boolean variable $ p_{xyc} \in \mathbb{B} $ thus yielding
-    a PL formula~$ \phi' $ (Figure~\ref{fig:lazy-and-incremental-approaches} left).
+    a PL formula~$ \phi' $.
     The PL formula represents the "skeleton", the Boolean abstraction over
     the original DL formula $ \phi $.
     Then a SAT solver is used in tandem with a DL constraints checker (the
     theory solver).
-    The SAT solver tries to find a solution for $ \phi' $.
-    If it fails then the original formula is UNSAT.
-    When a solution is found, then DL constraints, which correspond to
-    the substituted $ p_{xyc} $ variables, need to be checked.
-    The DL constraints checker does that.
-    If the DL constraints are not conflicting then the initial formula is
-    SAT. If the DL constraints checker has found a conflict, it needs to
-    interpret this conflict in terms of the Boolean $ p_{xyc} $ variables
-    and return the SAT solver an explanation (an assertion clause basically).
-    After that the SAT solver start to solve an updated formula all over
-    again.
     \item Incremental approach
     (Figure~\ref{fig:lazy-and-incremental-approaches} right).
-    This approach as the previous one also suggests encoding the input
-    DL formula into a Boolean "skeleton".
-    In this approach a SAT solver and a DL constraints checker also work
+    This approach, like the previous one, also suggests encoding the input
+    DL formula into a Boolean "skeleton" and
+    a SAT solver and a DL constraints checker also work
     in tandem.
     However, instead of solving the whole formula and then giving a
     complete answer to the DL constraints checker, the SAT solver invokes
