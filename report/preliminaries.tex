@@ -56,6 +56,48 @@ A couple of examples are given below:
 
 
 \subsection{Bellman-Ford Algorithm}
-Describe Bellman-Ford algorithm and how is it applied to the
-DL SAT problem:
-"We detect cycles using a depth-first variant of the Bellman-Ford-Moore algorithm [GR93] which has much better average case complexity in practice"~\cite{cotton2004some}
+Bellman-Ford algorithm~\cite[p.651]{cormen2009introduction} calculates
+shortest paths from a single source vertex to all others.
+It can also detect negative cycles.
+In~\cite{cotton2004some} a Goldberg-Radzik~\cite{cormen2009introduction}
+variant of the Bellman-Ford algorithm is used.
+The algorithm is given below:
+\begin{Algorithm}
+    \caption{A basic SAT checking algorithm for solving SAT problem of PL.
+        It takes a PL formula to be checked for satisfiability and
+        returns SAT status of the formula (SAT or UNSAT)
+        and, in case when the formula is SAT, a model \ie an assignment, which evaluates the formula to $ True $.}
+    \label{alg:bellman-ford}
+    \begin{algorithm}{procedure Scan}
+        {\text{PL formula} \phi}
+        model \= \varnothing \\
+        (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\
+        conflictHasArisen \= conflictingClauses \neq \varnothing \\
+        \begin{IF}{conflictHasArisen}
+            \RETURN (UNSAT, \NIL)
+        \end{IF} \\
+        model\=model \cup inferredAssignments \\
+        \begin{WHILE}{True}
+            (nextVariable, value) \= \CALL{Decide}(\phi, model) \\
+            allVariablesHaveAlreadyBeenAssigned \= nextVariable = \NIL \\
+            \begin{IF}{allVariablesHaveAlreadyBeenAssigned}
+                \RETURN (SAT, model)
+            \end{IF} \\
+            model \= model \cup \{ nextVariable \= value \} \\
+            \begin{REPEAT} \\
+                (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\
+                model \= model \cup inferredAssignments \\
+                conflictHasArisen \= conflictingClauses \neq \varnothing \\
+                \begin{IF}{conflictHasArisen}
+                    (newModelWithoutConflict, \phi_a) \= \CALL{Resolve}(\phi, model, conflictingClauses) \\
+                    conflictHasNotBeenResolved \= newModelWithoutConflict = \NIL \\
+                    \begin{IF}{conflictHasNotBeenResolved}
+                        \RETURN (UNSAT, \NIL)
+                    \end{IF} \\
+                    model \= newModelWithoutConflict \\
+                    \phi \= \phi \land \phi_a
+                \end{IF}
+            \end{REPEAT} \neg conflictHasArisen
+        \end{WHILE}
+    \end{algorithm}
+\end{Algorithm}
