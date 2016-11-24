@@ -16,7 +16,7 @@ One such basic SAT checking algorithm is given below:
         It also returns a model \ie an assignment, which evaluates
         the formula to $ True $, in case if the formula is SAT.}
     \label{alg:basic-sat}
-    \begin{algorithm}{\text{(SAT Status, Model) Check}}
+    \begin{algorithm}{Check}
         {\text{PL formula} \phi}
         model \= \varnothing \\
         (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\

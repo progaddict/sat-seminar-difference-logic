@@ -6,10 +6,10 @@
 \subsection{Notation}
 Throughout this Chapter the following notation is used:
 \begin{itemize}
-    \item $ \phi $ is a conjunction of some DL constraints
-    which is being checked for SAT.
-    \item $ (x - y \prec c) \in \phi $ is a general form
-    of a DL constraint where $ \prec \; \in \{ <, \leq \} $.
+    \item $ \phi $ is a conjunction of DL constraints.
+    It is being checked for SAT.
+    \item $ x - y \prec c $ is a general form
+    of a DL constraint in $ \phi $ where $ \prec \; \in \{ <, \leq \} $.
     \item $ \mathbb{D} $ is a domain over which
     the variables and constants in $ \phi $ are defined
     (\eg $ \mathbb{R} $).
@@ -47,24 +47,20 @@ if $ \phi $ is SAT.
 In~\cite{cotton2004some} it is defined as follows:
 \begin{definition}[Constraint Graph]
     \label{def:constraint-graph}
-    The constraint graph $ \Gamma $ represents a conjunction of
-    DL constraints $ \phi $.
-    It is a graph $ \Gamma = (V,E,weight,op) $ where:
+    The constraint graph is a graph $ \Gamma = (V,E,weight,op) $ where:
     \begin{itemize}
         \item $ V $ is a set of vertices. Each vertex $ x \in V $
-        corresponds to one numeric variable occurring in some DL constraint
-        $ x - y \prec c \in \phi $.
+        corresponds to one numeric variable occurring in $ x - y \prec c $.
         \item $ E $ is a set of directed edges. Each edge
-        $ (x,y) \in E $ corresponds to a DL inequality
-        $ x - y \prec c \in \phi $.
+        $ (x,y) \in E $ corresponds to $ x - y \prec c $.
         \item $ weight: E \mapsto \mathbb{D} $ is a weight function.
         It maps each edge $ (x,y) \in E $ to the constant
         $ c \in \mathbb{D} $ from the corresponding DL inequality
-        $ x - y \prec c \in \phi $.
+        $ x - y \prec c $.
         \item $ op: E \mapsto \{ <, \leq \} $ is a function which
         maps each edge $ (x,y) \in E $ to the operation
         $ \prec $ from the corresponding DL inequality
-        $ x - y \prec c \in \phi $.
+        $ x - y \prec c $.
     \end{itemize}
 \end{definition}
 
@@ -73,8 +69,7 @@ In~\cite{cotton2004some} it is defined as follows:
 
 \subsection{Negative Cycles in Constraint Graph}
 There is a direct correspondence between a negative cycle
-in a constraint graph and the SAT of the corresponding
-conjunction of DL constraints $ \phi $ represented by this graph.
+in a constraint graph and SAT of $ \phi $ represented by this graph.
 
 A path in the graph corresponds to a sum of the corresponding
 constraints. \Eg the path
@@ -83,17 +78,18 @@ in the left graph on Figure~\ref{fig:contraints-graphs}
 corresponds to the following sum of the DL inequalities:
 \begin{equation}
     \begin{aligned}
-        u - v & < 1 \\
-        v - w & < 5 \\
+        u - v & < \;\;\; 1 \\
+        v - w & < \;\;\; 5 \\
         w - x & \leq -3 \\
         \hline
-        u - x & < 3
+        u - x & < \;\;\; 3
     \end{aligned}
 \end{equation}
 If at least one strict inequality is present
 then the resulting inequality will also be strict.
 This summation along a path can also be expressed with
-a transitivity constraint (\eg~Equation~\ref{eq:transitivity-example}).
+an inferred transitivity constraint
+(\eg~Equation~\ref{eq:transitivity-example}).
 The transitivity constraint naturally follows from $ \phi $ and
 therefore must be satisfied in order to satisfy $ \phi $.
 
@@ -110,11 +106,11 @@ An example of a conflict can be seen on the right graph
 on Figure~\ref{fig:contraints-graphs}.
 The conflict corresponds to the negative cycle
 $ x \rightarrow y \rightarrow w \rightarrow x $
-which corresponds to the following inequalities:
+which corresponds to the following conflicting inequalities:
 \begin{equation}
     \begin{aligned}
         x - y & < -3 \\
-        y - w & < 4 \\
+        y - w & < \;\;\; 4 \\
         w - x & \leq -3 \\
         \hline
         0 & < -2
@@ -124,85 +120,130 @@ which corresponds to the following inequalities:
 
 
 \subsection{Bellman-Ford Algorithm for Constraint Graph}
-In~\cite{cotton2004some} a Goldberg-Radzik~\cite{goldberg1993heuristic}
+\cite{cotton2004some} uses a Goldberg-Radzik~\cite{goldberg1993heuristic}
 variant of the Bellman-Ford algorithm
-(Algorithm~\ref{alg:goldberg-radzik}) is applied to
-a constraint graph in order to detect negative cycles.
+(Algorithm~\ref{alg:goldberg-radzik}) to detect negative cycles.
+\cite{goldberg1993heuristic}~states that the algorithm has the same
+worst-case complexity $ O(|V| \cdot |E|) $
+as Bellman-Ford algorithm but is superior in practice.
 Important terminology and notation used in the algorithm are given below:
 \begin{itemize}
     \item The source vertex $ s \in V $ is a vertex from which
     the shortest paths to other vertices are computed.
     \item $ d(v) \in \mathbb{D} $ is a distance estimate
     from the source vertex to the given vertex $ v \in V $.
-    \item $ \pi(v) \in V $ is a parent of $ v \in V $ in a tree
-    of shortest paths. The tree has the source vertex as its root.
-    \item $ status(v) = \{ unreached, labelled, scanned \} $ denotes
-    if $ v \in V $ has or has not been reached yet or has been marked
-    as a scanned \ie processed vertex.
+%    \item $ \pi(v) \in V $ is a parent of $ v \in V $ in a tree
+%    of shortest paths. The tree has the source vertex as its root.
     \item $ r_d(x,y) = weight(x,y) + d(x) - d(y) $ is
-    a reduction in distance estimate associated with taking a path
-    from the source vertex to $ y \in V $ through $ x \in V $.
+    the reduced cost function~\cite{goldberg1993heuristic}.
+    It shows if it is possible to improve the distance estimate $ d(y) $
+    by taking a path through the intermediate vertex $ x \in V $.
+    \item $ status(v) = \{ unreached, labeled, scanned \} $
+    is a status of a vertex $ v \in V $.
+    $ status(v) = unreached $ means $ v $ has not been explored yet.
+    $ status(v) = labeled $ means $ v $ has been explored \ie
+    the distance estimate for it has been updated at least once
+    and potentially it can be used to improve distance estimates to
+    other vertices.
+    $ status(v) = scanned $ means $ v $ has been completely explored
+    and will not be considered further for improving distance estimates.
     \item Edge $ (x,y) \in E $ is called admissible if $ r_d(x,y) < 0 $
     \ie this edge can improve the current distance estimate for
     the vertex $ y \in V $.
     \item Admissible graph $ \Gamma_d $ is a subgraph
-    of $ \Gamma $ composed out of the admissible edges of $ \Gamma $.
+    of $ \Gamma $ composed of the admissible edges of $ \Gamma $.
+    It is dynamic because it depends on the distance estimates
+    which may change at each iteration of
+    the Algorithm~\ref{alg:goldberg-radzik}.
 \end{itemize}
 \begin{Algorithm}
-    \caption{Bellman-Ford algorithm takes a graph and a source vertex
-        and calculates distances to all other reachable vertices.
-        Goldberg-Radzik heuristic, applied to this algorithm,
-        suggests to scan a graph in a topological order.}
+    \caption{An algorithm for checking if $ \phi $ which corresponds
+        to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
+        It returns SAT or UNSAT status and a set of DL constraints
+        corresponding to a conflict (in case of UNSAT).
+        It is based on Bellman-Ford
+        algorithm~\cite[p.561]{cormen2009introduction}.
+        Goldberg-Radzik heuristic~\cite{goldberg1993heuristic},
+        which is used here,
+        suggests to scan a graph in a topological order.
+        This algorithm uses
+        depth first search~\cite[p.603]{cormen2009introduction} (DFS)
+        and breadth first search~\cite[p.594]{cormen2009introduction} (BFS)
+        for auxiliary tasks.}
     \label{alg:goldberg-radzik}
     \begin{algorithm}{Goldberg-Radzik}
-        {\text{constraint graph} (V,E,weight,op),
+        {\text{constraint graph} \Gamma = (V,E,weight,op),
             \text{source vertex} s \in V}
-        \CALL{Initialize-Single-Source}((V,E,weight,op), s) \\
-        newlyLabelledVertices \= \CALL{Scan}(s) \\
-        \begin{WHILE}{newlyLabelledVertices \; is \; not \; empty}
-            nextNewlyLabelledVertices \= \varnothing \\
-            \begin{FOR}{\mathrm{each \; vertex} \; v \; in \; newlyLabelledVertices}
-                t \= \CALL{Scan}(v) \\
-                nextNewlyLabelledVertices \= nextNewlyLabelledVertices \cup t
-            \end{FOR} \\
-            newlyLabelledVertices \= nextNewlyLabelledVertices
-        \end{WHILE} \\
-        \RETURN False
-    \end{algorithm}
-\end{Algorithm}
-
-\begin{Algorithm}
-    \caption{This procedure initializes distances, parent pointers \etc.}
-    \label{alg:init-single-source}
-    \begin{algorithm}{Initialize-Single-Source}
-        {\text{constraints graph} (V,E,weight,op), \text{source vertex} s}
-        \begin{FOR}{\mathrm{each \; vertex} \; v \in V}
-            d(v) = \infty \\
-            \pi(v) = \NIL \\
-            status(v) = unreached
+        \begin{FOR}{\mathrm{each \; vertex} \; x \in V}
+            d(x) = \infty \\
+            status(x) = unreached
         \end{FOR} \\
         d(s) = 0 \\
-        status(s) = labelled
+        status(s) = labeled \\
+        A \= \varnothing \\
+        B \= \{ s \} \\
+        \begin{REPEAT} \\
+            \begin{IF}{\Gamma_d \text{has a cycle (DFS on} \Gamma_d \text{can be used to check it)}}
+                \RETURN (UNSAT, \text{DL constraints corresponding to the detected cycle})
+            \end{IF} \\
+            \begin{FOR}{\mathrm{each \; vertex} \; x \in B}
+                \begin{IF}{x \text{has no outgoing admissible edges}}
+                    B \= B \setminus \{ x \} \\
+                    status(x) = scanned
+                \end{IF}
+            \end{FOR} \\
+            A \= \text{set of unexplored vertices reachable from}
+                    B \text{in} \Gamma_d
+                    \text{(BFS on} \Gamma_d \text{can be used here)} \\
+            A \= \text{sort} A \text{topologically using}
+                    \Gamma_d \text{as an input graph}
+                    \text{(DFS on} \Gamma_d \text{can be used here)} \\
+            B \= \varnothing \\
+            \begin{FOR}{\mathrm{each \; vertex} \; x \in A}
+                status(x) = labeled \\
+                \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
+                    \begin{IF}{d(x) + weight(x,y) < d(y)}
+                        d(y) \= d(x) + weight(x,y) \\
+                        \begin{IF}{status(y) = unreached}
+                            B \= B \cup \{ y \}
+                        \end{IF} \\
+                        status(y) \= labeled \\
+                        status(x) \= scanned
+                    \end{IF}
+                \end{FOR}
+            \end{FOR}
+        \end{REPEAT} A \; is \; empty \\
+        \RETURN (SAT, \varnothing) \\
     \end{algorithm}
 \end{Algorithm}
+Some notes to the Algorithm~\ref{alg:goldberg-radzik}:
+\begin{itemize}
+    \item In practice, checking $ \Gamma_d $ for a cycle (line~9) and
+    computing a set of vertices reachable from $ B $ (line~15) can be
+    done by only one DFS call.
+    However, it is two logically distinct steps and therefore they
+    are performed separately in the algorithm.
+    \item Unexplored vertices (line~15) are vertices which have
+    status $ unreached $ \ie they have not been processed yet at that
+    particular step.
+    \item If $ B $ is empty or no unexplored vertices
+    are reachable from it (line~15) then $ A $ will be assigned an
+    empty set.
+\end{itemize}
 
-\begin{Algorithm}
-    \caption{Given a labelled vertex $ v \in V $,
-        this procedure tries to improve the distance estimates by
-        scanning all the edges outgoing from $ v $.}
-    \label{alg:scan}
-    \begin{algorithm}{NewlyLabelledVertices Scan}
-        {\text{constraints graph} (V,E,weight,op),
-            \text{labelled vertex} v \in V}
-        newlyLabelledVertices \= \varnothing \\
-        \begin{FOR}{\mathrm{each \; edge} \; (v,w) \in E}
-            \begin{IF}{d(v) + weight(v,w) < d(w)}
-                \RETURN (UNSAT, \NIL)
-            \end{IF}
-        \end{FOR} \\
-        \RETURN newlyLabelledVertices
-    \end{algorithm}
-\end{Algorithm}
+The admissible graph $ \Gamma_d $ describes a set of possible path
+updates that can be used to improve distance estimates.
+If it contains a cycle then it means that one can
+update distance estimates infinitely by looping along
+this cycle.
+The idea of the Algorithm~\ref{alg:goldberg-radzik} is to det
+\begin{theorem}[Name of the theorem]
+    \label{the:nameOfTheorem}
+    This is how you write a theorem. Do not forget to prove the theorem.
+    \begin{proof}
+        Here you write the proof of the theorem.
+    \end{proof}
+\end{theorem}
 
 
 
