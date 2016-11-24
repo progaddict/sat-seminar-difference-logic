@@ -1,29 +1,34 @@
 \section{Introduction}
 \label{sec:introduction}
 
-DL is a special case of an LA logic in which
-all LA constraints have the form $ x - y \prec c $ where
-$ x $ and $ y $ are numerical variables, $ c $ is a constant
-and $ \prec \in \{<, \leq \} $ is a comparison operator.
-A more formal definition of DL is given
-below~\cite{cotton2004some},~\cite[p.5]{mahfoudh2003verification}:
+
+
+\subsection{Difference Logic}
+DL is a special case of an LA logic.
+\cite{cotton2004some} and~\cite[p.5]{mahfoudh2003verification}
+define DL as follows:
 \begin{definition}[Difference Logic]
     Let $ \mathcal{B} = \{ b_1, b_2, \dots \} $ be a set of Boolean
     variables and $ \mathcal{X} = \{ x_1, x_2, \dots \} $ be a set
-    of numerical variables. The difference logic over
+    of numerical variables over a domain $ \mathbb{D} $.
+    The domain $ \mathbb{D} $ is
+    either the Integers $ \mathbb{Z} $
+    or the Reals $ \mathbb{R} $.
+    The difference logic over
     $ \mathcal{B} $ and $ \mathcal{X} $ is called
     $ DL(\mathcal{X},\mathcal{B}) $ and given by the following grammar:
     \begin{equation*}
-        \phi \eqbydef b \; | \; (x - y < c) \; | \; \neg \phi \; | \;
+        \phi \eqbydef b \; | \; (x - y \prec c) \; | \; \neg \phi \; | \;
         \phi \land \phi
     \end{equation*}
-    where $ b \in \mathcal{B} $, $ x,y \in \mathcal{X} $ and
-    $ c \in \mathbb{D} $ is a constant. The domain $ \mathbb{D} $ is
-    either the integers $ \mathbb{Z} $ or the real numbers $ \mathbb{R} $.
-    \\
+    where $ b \in \mathcal{B} $,
+    $ x,y \in \mathcal{X} $,
+    $ c \in \mathbb{D} $ is a constant
+    and $ \prec \; \in \{ <, \leq \} $ is a comparison operator.
+
     The remaining Boolean connectives
     $ \lor, \rightarrow, \leftrightarrow, \dots $ can be defined in
-    the usual ways in terms of conjunction and negation.
+    the usual ways in terms of conjunction $ \land $ and negation $ \neg $.
 \end{definition}
 Examples of DL formulas are given below:
 \begin{equation}

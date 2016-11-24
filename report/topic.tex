@@ -3,6 +3,20 @@
 
 
 
+\subsection{Notation}
+Throughout this Chapter the following notation is used:
+\begin{itemize}
+    \item $ \phi $ is a conjunction of some DL constraints
+    which is being checked for SAT.
+    \item $ (x - y \prec c) \in \phi $ is a general form
+    of a DL constraint where $ \prec \; \in \{ <, \leq \} $.
+    \item $ \mathbb{D} $ is a domain over which
+    the variables and constants in $ \phi $ are defined
+    (\eg $ \mathbb{R} $).
+\end{itemize}
+
+
+
 \subsection{Constraint Graph}
 \begin{figure}[htb]
     \begin{center}
@@ -26,17 +40,11 @@
     \label{fig:contraints-graphs}
 \end{figure}
 Constraint graph (Figure~\ref{fig:contraints-graphs})
-is a weighted directed graph which is used by the DL
-constraints checker
-(Figure~\ref{fig:lazy-and-incremental-approaches}) to check
-if the given DL constraints are satisfiable.
-Let $ \phi $ be a conjunction of DL constraints (\ie a DL formula),
-let $ \prec \; = \{ <, \leq \} $ be an operation in a DL constraint
-$ x - y \prec c \in \phi $ and let variables and constants
-in the constraints be defined over a domain $ \mathbb{D} $
-(\ie $ x,y,c \in \mathbb{D} $ ) which can be \eg Reals ($ \mathbb{R} $).
-Then according to~\cite{cotton2004some} the constraint graph
-can be defined as follows:
+is a weighted directed graph which represents $ \phi $
+and which is used by a DL constraints checker
+(Figure~\ref{fig:lazy-and-incremental-approaches}) to test
+if $ \phi $ is SAT.
+In~\cite{cotton2004some} it is defined as follows:
 \begin{definition}[Constraint Graph]
     \label{def:constraint-graph}
     The constraint graph $ \Gamma $ represents a conjunction of
@@ -64,9 +72,9 @@ can be defined as follows:
 
 
 \subsection{Negative Cycles in Constraint Graph}
-If a constraint graph has a negative cycle then the corresponding
-conjunction of DL constraints $ \phi $ represented by the graph is
-not SAT.
+There is a direct correspondence between a negative cycle
+in a constraint graph and the SAT of the corresponding
+conjunction of DL constraints $ \phi $ represented by this graph.
 
 A path in the graph corresponds to a sum of the corresponding
 constraints. \Eg the path
@@ -122,6 +130,8 @@ variant of the Bellman-Ford algorithm
 a constraint graph in order to detect negative cycles.
 Important terminology and notation used in the algorithm are given below:
 \begin{itemize}
+    \item The source vertex $ s \in V $ is a vertex from which
+    the shortest paths to other vertices are computed.
     \item $ d(v) \in \mathbb{D} $ is a distance estimate
     from the source vertex to the given vertex $ v \in V $.
     \item $ \pi(v) \in V $ is a parent of $ v \in V $ in a tree
@@ -196,7 +206,6 @@ Important terminology and notation used in the algorithm are given below:
 
 
 
-\newpage
 \subsection{Implementation Details}
 Some implementation details (Numeric Conflict Analysis,
 Reducing Feasibility Checks).
