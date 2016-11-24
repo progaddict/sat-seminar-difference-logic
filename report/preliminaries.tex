@@ -3,72 +3,19 @@
 
 
 
-\subsection{Constraint Graph}
-\begin{figure}[htb]
-    \begin{center}
-        \begin{tabular}{cc}
-            \begin{minipage}{0.45\linewidth}
-                \begin{center}
-                    \input{pictures/fig-example-cg-1.tex}
-                \end{center}
-            \end{minipage}
-            &
-            \begin{minipage}{0.45\linewidth}
-                \begin{center}
-                    \input{pictures/fig-example-cg-2.tex}
-                \end{center}
-            \end{minipage}
-        \end{tabular}
-    \end{center}
-    \caption{Examples of constraint graphs for
-        Equation~\ref{eq:example-2} (left) and
-        Equation~\ref{eq:example-3} (right).}
-    \label{fig:contraints-graphs}
-\end{figure}
-Constraint Graph (Figure~\ref{fig:contraints-graphs})
-is used by the DL constraints checker
-(Figure~\ref{fig:lazy-and-incremental-approaches}).
-It represents the DL constraints and allows calculate transitivity
-relations between them (\eg Equation~\ref{eq:transitivity-example}).
-According to~\cite{cotton2004some} this graph is defined as follows:
-\begin{definition}[Constraint Graph]
-    The constraint graph of a set (or conjunction) of
-    DL constraints $ \Gamma $ is a graph $ \Gamma = (V,E,\xi) $
-    with one vertex per numeric variable occurring in some DL
-    constraint in $ \Gamma $, edges
-    $ E = \{(x,y): (x - y \prec c) \in \Gamma \; for \; some \; (\prec, c) \in B \}$
-    and a function $ \xi: E \mapsto B $ defined
-    by $ (x,y) \mapsto \min\{(\prec, c) : (x-y \prec c) \in \Gamma\} $.
-\end{definition}
-Where $ \prec \in \{ <, \leq \} $,
-$ B = \{ (\prec, c) \} $ is a set of bounds.
-On $ B $ an order is defined as follows:
-$ (\prec, c) <_B (\prec', c') $ when $ c < c' $
-or when $ c = c' $ and $ \prec $ is $ < $ and $ \prec' $ is $ \leq $.
-A couple of examples are given below:
-\begin{equation}
-    \begin{aligned}
-        (\leq, -3) <_B (<, -1) \\
-        (<, -1) <_B (\leq, -1) \\
-    \end{aligned}
-\end{equation}
-
-
-
-\subsection{Bellman-Ford Algorithm}
-Bellman-Ford algorithm~\cite[p.651]{cormen2009introduction} calculates
-shortest paths from a single source vertex to all others.
-It can also detect negative cycles.
-In~\cite{cotton2004some} a Goldberg-Radzik~\cite{cormen2009introduction}
-variant of the Bellman-Ford algorithm is used.
-The algorithm is given below:
+\subsection{Solving SAT Problem of Propositional Logic}
+Most of the SAT solvers employ a variation of the
+Davis-Putnam-Logemann-Loveland (DPLL)
+algorithm~\cite{davis1960computing, davis1962machine}
+for solving SAT problem of the propositional logic (PL).
+One such basic SAT checking algorithm is given below:
 \begin{Algorithm}
     \caption{A basic SAT checking algorithm for solving SAT problem of PL.
         It takes a PL formula to be checked for satisfiability and
         returns SAT status of the formula (SAT or UNSAT)
         and, in case when the formula is SAT, a model \ie an assignment, which evaluates the formula to $ True $.}
-    \label{alg:bellman-ford}
-    \begin{algorithm}{procedure Scan}
+    \label{alg:basic-sat}
+    \begin{algorithm}{\text{(SAT Status, Model) Check}}
         {\text{PL formula} \phi}
         model \= \varnothing \\
         (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\
@@ -101,3 +48,98 @@ The algorithm is given below:
         \end{WHILE}
     \end{algorithm}
 \end{Algorithm}
+
+The Algorithm~\ref{alg:basic-sat} is quite generic.
+It is more of a template.
+One needs to plug into this template his own implementations of the
+following functions:
+\begin{itemize}
+    \item[$ \algCALL{Propagate} $] This function takes a PL formula
+    and a model and returns all assignments that follow from
+    them.
+    It also returns a list of conflicting clauses (if there are any).
+    These clauses will be in conflict with the model if one extends
+    the model by applying the returned assignments.
+    \item[$ \algCALL{Decide} $] This function takes a PL formula
+    and a model. Then, by applying some heuristic, it
+    selects a variable and a value for it and returns them.
+    \item[\algCALL{Resolve}] This function takes a PL formula, current
+    conflicting model and a list of the clauses which are in the conflict
+    with the current model.
+    It returns a new model which does not have the conflict and an assertion clause
+    $ \phi_a $ (or a conjunction of assertion clauses) which carries the knowledge
+    about the resolved conflict.
+    If the conflict cannot be resolved, the function returns $ \algNIL $ as
+    the model.
+\end{itemize}
+
+In the Algorithm~\ref{alg:basic-sat} a model is represented by
+a mapping from PL variables of the input PL formula to Booleans.
+It is a simplification.
+Real-world SAT solvers maintain a lot of additional information
+such as decision levels, assignment order of variables for every
+decision level, an implicant for
+every variable (\ie the clause from which the variable's
+value was inferred during the $ \algCALL{Propagate} $) \etc
+
+
+
+\subsection{Solving SAT Problem of Difference Logic}
+\begin{figure}[htb]
+    \begin{center}
+        \begin{tabular}{lr}
+            \begin{minipage}{0.48\linewidth}
+                \begin{center}
+                    \input{pictures/fig-lazy-approach.tex}
+                \end{center}
+            \end{minipage}
+            &
+            \begin{minipage}{0.48\linewidth}
+                \begin{center}
+                    \input{pictures/fig-incremental-approach.tex}
+                \end{center}
+            \end{minipage}
+        \end{tabular}
+    \end{center}
+    \caption{Illustration of the lazy (left) and incremental (right) approaches.}
+    \label{fig:lazy-and-incremental-approaches}
+\end{figure}
+As mentioned in~\cite{cotton2004some} the following main approaches are used for
+solving the SAT problem of DL:
+
+\begin{itemize}
+    \item Preprocessing approach. This approach suggests transforming a DL
+    formula into an equivalent PL formula by encoding all intrinsic
+    dependencies between DL constraints in PL.
+    An example of such a dependency could be transitivity:
+    \begin{equation}
+    \label{eq:transitivity-example}
+    (x-y<a) \land (y-z<b) \rightarrow (x-z<a+b)
+    \end{equation}
+    After the transformation a SAT solver can be used to check SAT of
+    the resulting equivalent PL formula.
+    If the PL formula is SAT then the solution for the original DL formula
+    can be constructed by the reverse transformation.
+    \item Lazy approach
+    (Figure~\ref{fig:lazy-and-incremental-approaches} left).
+    This approach suggests substituting each DL constraint $ x-y<c $ with
+    a Boolean variable $ p_{xyc} \in \mathbb{B} $ thus yielding
+    a PL formula~$ \phi' $.
+    The PL formula represents the "skeleton", the Boolean abstraction over
+    the original DL formula $ \phi $.
+    Then a SAT solver is used in tandem with a DL constraints checker (the
+    theory solver).
+    \item Incremental approach
+    (Figure~\ref{fig:lazy-and-incremental-approaches} right).
+    This approach, like the previous one, also suggests encoding the input
+    DL formula into a Boolean "skeleton" and
+    a SAT solver and a DL constraints checker also work
+    in tandem.
+    However, instead of solving the whole formula and then giving a
+    complete answer to the DL constraints checker, the SAT solver invokes
+    the DL constraints checker each time it updates its model.
+    The DL constraints checker should be able to maintain some internal
+    state of the currently received DL constraints and update it
+    incrementally (\ie add new constraints, delete existing ones).
+    Hence the name of the approach.
+\end{itemize}
