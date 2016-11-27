@@ -6,7 +6,7 @@
 \subsection{Notation}
 Throughout this Chapter the following notation is used:
 \begin{itemize}
-    \item $ \phi $ is a conjunction of DL constraints.
+    \item $ \phi $ is a \emph{conjunction} of DL constraints.
     It is being checked for SAT.
     \item $ x - y \prec c $ is a general form
     of a DL constraint in $ \phi $ where $ \prec \; \in \{ <, \leq \} $.
@@ -129,32 +129,95 @@ and thus check $ \phi $ for SAT
 worst-case complexity $ O(|V| \cdot |E|) $
 as Bellman-Ford algorithm but is superior in practice.
 Terminology and notation used in the algorithm are given below.
+
+\begin{Algorithm}
+    \caption{An algorithm for checking if $ \phi $ which corresponds
+        to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
+        It returns SAT or UNSAT status and a set of DL constraints
+        corresponding to a conflict (in case of UNSAT).
+        It is based on Bellman-Ford
+        algorithm~\cite[p.561]{cormen2009introduction}.
+        Goldberg-Radzik heuristic~\cite{goldberg1993heuristic},
+        which is used here,
+        suggests to scan a graph in a topological order.
+        This algorithm uses
+        depth first search~\cite[p.603]{cormen2009introduction} (DFS)
+        and breadth first search~\cite[p.594]{cormen2009introduction} (BFS)
+        for auxiliary tasks.}
+    \label{alg:goldberg-radzik}
+    \begin{algorithm}{Goldberg-Radzik}
+        {\text{constraint graph} \Gamma = (V,E,weight,op),
+            \text{source vertex} s \in V}
+        \begin{FOR}{\mathrm{each \; vertex} \; x \in V}
+            d(x) = \infty \\
+            status(x) = unreached
+        \end{FOR} \\
+        d(s) = 0 \\
+        status(s) = labeled \\
+        A \= \varnothing \\
+        B \= \{ s \} \\
+        \begin{REPEAT} \\
+            \begin{IF}{\Gamma_d \text{has a cycle} C \text{(DFS on} \Gamma_d \text{can be used to check it)}}
+                l \= \text{length of} C \text{in} \Gamma \\
+                \begin{IF}{l < 0}
+                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
+                \end{IF} \\
+                \begin{IF}{\exists \; (x,y) \in L \text{such that} op(x,y) = \; <}
+                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
+                \end{IF}
+            \end{IF} \\
+            \begin{FOR}{\mathrm{each \; vertex} \; x \in B}
+                \begin{IF}{x \text{has no outgoing admissible edges}}
+                    B \= B \setminus \{ x \} \\
+                    status(x) = scanned
+                \end{IF}
+            \end{FOR} \\
+            A \= \text{set of unexplored vertices reachable from}
+            B \text{in} \Gamma_d
+            \text{(BFS on} \Gamma_d \text{can be used here)} \\
+            A \= \text{sort} A \text{topologically using}
+            \Gamma_d \text{as an input graph}
+            \text{(DFS on} \Gamma_d \text{can be used here)} \\
+            B \= \varnothing \\
+            \begin{FOR}{\mathrm{each \; vertex} \; x \in A}
+                status(x) = labeled \\
+                \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
+                    \begin{IF}{d(x) + weight(x,y) < d(y)}
+                        d(y) \= d(x) + weight(x,y) \\
+                        \begin{IF}{status(y) = unreached}
+                            B \= B \cup \{ y \}
+                        \end{IF} \\
+                        status(y) \= labeled \\
+                        status(x) \= scanned
+                    \end{IF}
+                \end{FOR}
+            \end{FOR}
+        \end{REPEAT} A \; is \; empty \\
+        \RETURN (SAT, \varnothing) \\
+    \end{algorithm}
+\end{Algorithm}
+
 \begin{definition}[Source Vertex]
     The source vertex $ s \in V $ is a vertex from which
     the shortest paths to other vertices are computed.
 \end{definition}
-\begin{definition}[Shortest Path Weight]
-    The shortest path weight~\cite[p.643]{cormen2009introduction}
-    $ \delta(v) $ from the source vertex
-    to $ v \in V $ is defined as the minimal sum of the weights of the edges
-    of a path from the source vertex to $ v $ across all such paths
-    (if at least one exist).
-    If there is no path from the source vertex to $ v $
-    then $ \delta(v) = \infty $.
-    If there is a negative cycle on a path from the source vertex to $ v $
-    then $ \delta(v) = -\infty $.
-\end{definition}
+
 \begin{definition}[Distance Estimating Function~\cite{cotton2004some}]
     The distance estimating function $ d(v): V \mapsto \mathbb{D} $
-    is function which returns an upper bound on the distance
+    is a function which returns an upper bound
+    on the length of the shortest path
     from the source vertex to the given vertex $ v \in V $.
 \end{definition}
+
 \begin{definition}[Reduced Cost Function~\cite{goldberg1993heuristic}]
     The reduced cost function
     $ r(x,y): V \mapsto \mathbb{D} $ is
     defined as follows:
     $ r(x,y) = weight(x,y) + d(x) - d(y) $.
 \end{definition}
+
+\newpage
+
 \begin{definition}[Vertex Status]
     The vertex status
     $ status(x) = \{ unreached, labeled, scanned \} $
@@ -239,7 +302,7 @@ expresses this idea more formally.
         cannot be applicable to it.
         It can be the case, however, that this edge will be relaxed
         again in some further iterations.
-        Since we do not have cycles in $ \Gamma_d $,
+        Since there are no cycles in $ \Gamma_d $,
         multiple updates are only possible
         when there are some better paths $ p_1, p_2, \dots p_n $
         from the source vertex $ s $
@@ -249,9 +312,9 @@ expresses this idea more formally.
         of the edge $ (x,y) $.
         Number of these paths cannot be infinite
         because the graph has finite number of vertices and edges.
-        Therefore the edge $ (x,y) $ will be updated finitely many
+        Therefore the edge $ (x,y) $ will be relaxed finitely many
         times.
-        Thus, at some iteration $ r(x,y) $ will become zero
+        Then $ r(x,y) $ will become zero at some iteration and
         the edge will stay in $ \Gamma_d $ for all further iterations.
 
         The above reasoning has been applied to an arbitrary edge
@@ -264,7 +327,7 @@ expresses this idea more formally.
         $ (x,y) \in \Gamma $ we will have $ r(x,y) \ge 0 $.
         Thus, the distance update process will converge.
         However, in~\cite[p.653]{cormen2009introduction} it has been
-        proven that in case when $ \Gamma $ has a negative cycle
+        proven that, in case when $ \Gamma $ has a negative cycle,
         the distance update process does not converge.
         Therefore we have a contradiction and the initial assumption
         is wrong.
@@ -279,7 +342,7 @@ expresses this idea more formally.
         In this case the distance estimate process
         will converge to some function
         $ d_k $ which means that there is no edge that can be relaxed,
-        including the edges of $ Z $ cannot be relaxed:
+        including the edges of $ Z $:
         \begin{equation}
             \label{eq:triangle-inequlity}
             d(x_i) + weight(x_i, x_{i+1}) \ge d(x_{i+1}), \; 0 \le i < n
@@ -346,70 +409,3 @@ expresses this idea more formally.
         which is less than or equal to zero.
     \end{proof}
 \end{theorem}
-
-\begin{Algorithm}
-    \caption{An algorithm for checking if $ \phi $ which corresponds
-        to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
-        It returns SAT or UNSAT status and a set of DL constraints
-        corresponding to a conflict (in case of UNSAT).
-        It is based on Bellman-Ford
-        algorithm~\cite[p.561]{cormen2009introduction}.
-        Goldberg-Radzik heuristic~\cite{goldberg1993heuristic},
-        which is used here,
-        suggests to scan a graph in a topological order.
-        This algorithm uses
-        depth first search~\cite[p.603]{cormen2009introduction} (DFS)
-        and breadth first search~\cite[p.594]{cormen2009introduction} (BFS)
-        for auxiliary tasks.}
-    \label{alg:goldberg-radzik}
-    \begin{algorithm}{Goldberg-Radzik}
-        {\text{constraint graph} \Gamma = (V,E,weight,op),
-            \text{source vertex} s \in V}
-        \begin{FOR}{\mathrm{each \; vertex} \; x \in V}
-            d(x) = \infty \\
-            status(x) = unreached
-        \end{FOR} \\
-        d(s) = 0 \\
-        status(s) = labeled \\
-        A \= \varnothing \\
-        B \= \{ s \} \\
-        \begin{REPEAT} \\
-            \begin{IF}{\Gamma_d \text{has a cycle} C \text{(DFS on} \Gamma_d \text{can be used to check it)}}
-                l \= \text{length of} C \text{in} \Gamma \\
-                \begin{IF}{l < 0}
-                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
-                \end{IF} \\
-                \begin{IF}{\exists \; (x,y) \in L \text{such that} op(x,y) = \; <}
-                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
-                \end{IF}
-            \end{IF} \\
-            \begin{FOR}{\mathrm{each \; vertex} \; x \in B}
-                \begin{IF}{x \text{has no outgoing admissible edges}}
-                    B \= B \setminus \{ x \} \\
-                    status(x) = scanned
-                \end{IF}
-            \end{FOR} \\
-            A \= \text{set of unexplored vertices reachable from}
-                    B \text{in} \Gamma_d
-                    \text{(BFS on} \Gamma_d \text{can be used here)} \\
-            A \= \text{sort} A \text{topologically using}
-                    \Gamma_d \text{as an input graph}
-                    \text{(DFS on} \Gamma_d \text{can be used here)} \\
-            B \= \varnothing \\
-            \begin{FOR}{\mathrm{each \; vertex} \; x \in A}
-                status(x) = labeled \\
-                \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
-                    \begin{IF}{d(x) + weight(x,y) < d(y)}
-                        d(y) \= d(x) + weight(x,y) \\
-                        \begin{IF}{status(y) = unreached}
-                            B \= B \cup \{ y \}
-                        \end{IF} \\
-                        status(y) \= labeled \\
-                        status(x) \= scanned
-                    \end{IF}
-                \end{FOR}
-            \end{FOR}
-        \end{REPEAT} A \; is \; empty \\
-        \RETURN (SAT, \varnothing) \\
-    \end{algorithm}
-\end{Algorithm}

@@ -10,7 +10,7 @@
 \node [block, below = 3cm of sat-solver, text width=4cm, align=center] (theory-solver) {DL Constrains Checker (Theory Solver)};
 \node [draw, circle, inner sep=0pt, text width=1.5cm, align=center, right = 2.5cm of pl] (sat) {$ \phi $ is SAT or UNSAT};
 
-\draw [->] (dl) -- node[anchor=east, name=substitution] {$ x - y < c \eqbydef p_{xyc} $} (pl);
+\draw [->] (dl) -- node[anchor=east, name=substitution] {$ x - y \prec c \eqbydef p_{xyc} $} (pl);
 \draw [->] (pl) -- (sat-solver);
 \draw [->] (substitution) edge[bend right=70] node[anchor=south, sloped] {mapping} (theory-solver);
 \draw [-] (sat-solver.west) edge[bend right=50] (model);
