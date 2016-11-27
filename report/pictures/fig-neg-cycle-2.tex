@@ -10,9 +10,10 @@
     \draw [->] (s) -- node[anchor=south, sloped] {1} (u);
     \draw [->] (u) -- node[anchor=south, sloped] {-1} (v);
     \draw [->] (v) -- node[anchor=south, sloped] {-1} (w);
-    \draw [->] (w) -- node[anchor=south, sloped] {-1} (x);
+    \draw [->] (v) -- node[anchor=south, sloped] {-1} (x);
     \draw [->] (x) -- node[anchor=south, sloped] {1} (y);
-    \draw [->] (y) -- node[anchor=south, sloped] {-1} (w);
+    \draw [->] (y) -- node[anchor=south, sloped] {-1} (z);
     \draw [->] (w) -- node[anchor=south, sloped] {1} (z);
     \draw [->] (z) -- node[anchor=south, sloped] {-1} (u);
+    \draw [->] (z) -- node[anchor=south, sloped] {-1} (v);
 \end{tikzpicture}

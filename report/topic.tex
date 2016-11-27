@@ -151,9 +151,9 @@ Terminology and notation used in the algorithm are given below.
 \end{definition}
 \begin{definition}[Reduced Cost Function~\cite{goldberg1993heuristic}]
     The reduced cost function
-    $ r_d(x,y): V \mapsto \mathbb{D} $ is
+    $ r(x,y): V \mapsto \mathbb{D} $ is
     defined as follows:
-    $ r_d(x,y) = weight(x,y) + d(x) - d(y) $.
+    $ r(x,y) = weight(x,y) + d(x) - d(y) $.
 \end{definition}
 \begin{definition}[Vertex Status]
     The vertex status
@@ -178,20 +178,36 @@ Terminology and notation used in the algorithm are given below.
 
 In Algorithm~\ref{alg:goldberg-radzik} distance estimates are iteratively
 updated.
-In~\cite[p.648]{cormen2009introduction} this process
-is called "iterative edge relaxation".
-It can also be seen as a series of different distance
-estimate functions $ (d_0, d_1, d_2, d_3, \dots) $.
+In~\cite[p.648]{cormen2009introduction} the act of updating a distance
+estimate using an edge is called ``edge relaxation``
+(Equation~\ref{eq:edge-relaxation}).
+This iterative process can also be seen as a series of different distance
+estimating functions $ (d_0, d_1, d_2, d_3, \dots) $.
 Each $ d_i $ in this series describes which distance estimates
 have the vertices at some iteration of
 the Algorithm~\ref{alg:goldberg-radzik}.
 
+\begin{figure}[htb]
+    \begin{center}
+        \begin{tabular}{c}
+            \begin{minipage}{0.95\linewidth}
+                \begin{center}
+                    \input{pictures/fig-edge-relaxation.tex}
+                \end{center}
+            \end{minipage}
+        \end{tabular}
+    \end{center}
+    \caption{Multiple paths from $ s $ to $ y $
+        may be used to improve distance estimate to $ x $.}
+    \label{fig:edge-relaxation}
+\end{figure}
 The idea of the Algorithm~\ref{alg:goldberg-radzik} is to use
 the dynamically changing graph $ \Gamma_d $
 (it changes whenever $ d $ changes)
 to detect negative or zero cycles in the original graph $ \Gamma $.
 The following theorem from~\cite{cotton2004some}
 expresses this idea more formally.
+
 \begin{theorem}
     \label{the:neg-cycle-in-cg}
     Given a constraint graph $ \Gamma $ and a series of distance estimating
@@ -199,123 +215,138 @@ expresses this idea more formally.
     or zero cycle if and only if $ \Gamma_d $ has a cycle under some
     distance estimate $ d_k $.
     \begin{proof}
-        $ \Rightarrow $ Case 1. $ \Gamma $ has a negative cycle
-        $ N = (x_0, x_1, \dots, x_{n-1}, x_n) $ with $ x_n = x_0 $.
-        To prove:
-        $ \Gamma_d $ also has this cycle.
-        In~\cite[pp.672-673]{cormen2009introduction} it
-        is proven that if a graph has a negative cycle,
-        then the distance estimation process $ (d_0, d_1, d_2, d_3, \dots) $
-        will never converge.
-        Therefore, for sufficiently large $ k $ there always will be some
-        edge from $ N $ which can further update current $ d_k $ \ie
-        $ \exists i, 0 \leq i < n: d_k(x_i) + weight(x_i, w_{i+1}) < d_k(x_{i+1}) $.
+        $ \Rightarrow $ Case 1. $ \Gamma $ has a negative cycle.
+        To prove: $ \Gamma_d $ has a cycle at some distance estimate $ d_k $.
 
-        It can be the case that at some further iteration a
-        path $ p = s \rightarrow x_{i+1} $
-        from the source vertex $ s $ to $ x_{i+1} $
-        will be discovered and this path may give even better improvement
-        than the mentioned one for $ d_k $
-        \ie $ len(p) < d_k(x_i) + weight(x_i, w_{i+1}) $
-        where $ len(p) $ is the length of the path $ p $.
-        In this situation an edge from the path $ p $
-        will be applied to update $ d $ and therefore
-        edge $ (x_i, x_{i+1}) $
-        will be excluded from $ \Gamma_d $
-        because in this case
-        $ r_d(x_i,x_{i+1}) = weight(x_i,x_{i+1}) + d_m(x_i) - d_m(x_{i+1}) = weight(x_i,x_{i+1}) + d_k(x_i) - len(p) > 0 $
-        where $ m > k $ is some further iteration in which
-        the path $ p $ has been used to update distance estimate
-        to the vertex $ x_{i+1} $, \ie $ d_m(x_{i+1}) = len(p) $,
-        and the distance estimate to the
-        vertex $ x_i $ has not been updated, \ie $ d_m(x_i) = d_k(x_i) $.
-        A simple example is given
-        on~Figure~\ref{fig:negative-cycles-in-graphs} on the left
-        where in the very beginning a path $ (s,x) $
-        from $ s $ to $ x $
-        will be the shortest known path until the negative edge
-        $ (w,x) $ is discovered and the path $ (s,v,w,x) $
-        will be shorter.
+        Suppose $ \Gamma_d $ has no cycles at any distance estimate
+        (the initial assumption).
+        Consider an arbitrary edge $ (x,y) \in \Gamma_d $
+        at some distance estimate $ d_k $ for which $ r(x,y) < 0 $
+        \ie this edge can be relaxed.
+        If we apply relaxation to this edge then we change the
+        distance estimate to some $ d_{k+1} $ by updating
+        distance estimate for the vertex $ y $ to a smaller value:
+        \begin{equation}
+            \label{eq:edge-relaxation}
+            \begin{aligned}
+                r(x,y) < 0 \Rightarrow d_k(x) + weight(x,y) < d_k(y) \\
+                d_{k+1}(y) = d_k(x) + weight(x,y)
+            \end{aligned}
+        \end{equation}
+        Immediately after this operation
+        we will have that $ r(x,y) = 0 $ and thus
+        the edge will still be in $ \Gamma_d $ but relaxation
+        cannot be applicable to it.
+        It can be the case, however, that this edge will be relaxed
+        again in some further iterations.
+        Since we do not have cycles in $ \Gamma_d $,
+        multiple updates are only possible
+        when there are some better paths $ p_1, p_2, \dots p_n $
+        from the source vertex $ s $
+        to $ x $ (Figure~\ref{fig:edge-relaxation}).
+        These paths can be used to update distance estimate
+        for the vertex $ x $ and make possible relaxation
+        of the edge $ (x,y) $.
+        Number of these paths cannot be infinite
+        because the graph has finite number of vertices and edges.
+        Therefore the edge $ (x,y) $ will be updated finitely many
+        times.
+        Thus, at some iteration $ r(x,y) $ will become zero
+        the edge will stay in $ \Gamma_d $ for all further iterations.
 
-        Since a graph has a finite number of edges, the number of such
-        paths, which connect $ s $ and a vertex in $ N $, is also finite.
-        Therefore \WLOG we can assume that
-        the $ k $ is sufficiently large and
-        all this paths have already been discovered and applied
-        to improve $ d $.
-        If these paths are not contained in other negative cycles,
-        they cannot be used in further iterations
-        (see "convergence property" and "path relaxation property"
-        in~\cite[p.650]{cormen2009introduction}).
-
-        Suppose, however, that there is another negative cycle which
-        has a connection with $ N $.
-        An example is given
-        on~Figure~\ref{fig:negative-cycles-in-graphs} on the right
-        where the negative cycle $ (u,v,w,z,u) $ has the common vertex
-        $ w $ with another negative cycle $ (w,x,y,w) $.
-        So this cycle can interfere with $ N $ and cause some of the
-        edges of $ N $ to be excluded from $ \Gamma_d $ by providing
-        a better update to the vertex $ x_{i+1} $ than the edge
-        $ (x_i,x_{i+1}) $.
-        However, in order to provide this update to $ x_{i+1} $
-        algorithm needs to enter this cycle and complete it
-        \ie follow all its edges and apply updates.
-        Therefore, again, \WLOG we can regard this interfering
-        negative cycle
-        instead of $ N $.
-
-        Thus, \WLOG let the regarded cycle $ N $ be a cycle
-        which does not interfere with other cycles and
-        let $ k $ be sufficiently large such that all paths, which
-        connect $ s $ with vertices of $ N $
-        and which are not contained in any negative cycles,
-        have already been
-        applied to improve $ d $ and therefore will not be applied
-        in the further iterations.
-        Then the edge $ (x_i,x_{i+1}) $ will trigger a series of updates
-        of $ d $ which will be applied along $ N $.
-        There will be no interference from other negative cycles.
-        Otherwise we would regard them instead of $ N $.
-        There will be no interference from paths,
-        which start at $ s $ and end at some vertex of $ N $,
-        because otherwise we would choose larger $ k $.
-        Therefore after this series of updates, algorithm
-        arrives at some estimate $ d_{k'}, k'>k $ for which
-        the reduced cost function on the edges of $ N $ will be zero
-        or less and therefore the edges of $ N $ will be in $ \Gamma_d $
-        by definition.
+        The above reasoning has been applied to an arbitrary edge
+        $ (x,y) $ for which we have $ r(x,y) < 0 $ at some distance
+        estimate $ d_k $ during the execution of the algorithm.
+        This reasoning can be repeated for all other edges and
+        it can be concluded therefore that
+        after some finite number of iterations no
+        distance updates will be possible, because for any edge
+        $ (x,y) \in \Gamma $ we will have $ r(x,y) \ge 0 $.
+        Thus, the distance update process will converge.
+        However, in~\cite[p.653]{cormen2009introduction} it has been
+        proven that in case when $ \Gamma $ has a negative cycle
+        the distance update process does not converge.
+        Therefore we have a contradiction and the initial assumption
+        is wrong.
+        Thus, $ \Gamma_d $ will have a cycle at some distance estimate.
+        \\
 
         Case 2. $ \Gamma $ has no negative cycles but it has
         a zero weight cycle $ Z = (x_0, x_1, \dots, x_{n-1}, x_n) $
-        with $ x5_n = x_0 $.
-        Then ...
+        with $ x_n = x_0 $.
+        To prove: $ \Gamma_d $ has a cycle at some distance estimate $ d_k $.
+
+        In this case the distance estimate process
+        will converge to some function
+        $ d_k $ which means that there is no edge that can be relaxed,
+        including the edges of $ Z $ cannot be relaxed:
+        \begin{equation}
+            \label{eq:triangle-inequlity}
+            d(x_i) + weight(x_i, x_{i+1}) \ge d(x_{i+1}), \; 0 \le i < n
+        \end{equation}
+        Let us sum the inequality from Equation~\ref{eq:triangle-inequlity}
+        along the cycle $ Z $:
+        \begin{equation}
+            \label{eq:sum-along-cycle}
+            \begin{aligned}
+                \sum_{i=0}^{n-1} d(x_i) + \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \ge \sum_{i=0}^{n-1} d(x_{i+1}) \\
+                \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \ge \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
+                Z \; \mathrm{has \; zero \; weight} \\
+                0 \ge \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
+                \mathrm{apply \; index \; renaming \; to \; the \; first \; sum} \\
+                0 \ge \sum_{i=1}^{n} d(x_i) - \sum_{i=0}^{n-1} d(x_i) \\
+                \mathrm{since} \; x_0 = x_n \; \mathrm{the \; two \; sums \; are \; actually \; equal} \\
+                0 \ge 0
+            \end{aligned}
+        \end{equation}
+        The final inequality in Equation~\ref{eq:sum-along-cycle}
+        is valid and is a consequence of the convergence.
+
+        Now assume that there is at least one edge
+        $ (x_i,x_{i+1}) $
+        along the cycle $ Z $
+        for which we have
+        $ d(x_i) + weight(x_i, x_{i+1}) > d(x_{i+1}) $
+        (the initial assumption).
+        Then, if we do the summation
+        in Equation~\ref{eq:sum-along-cycle} again,
+        we will get a strict inequality $ 0 > 0 $
+        which is invalid.
+        Thus, we have a contradiction with the convergence condition
+        and therefore the initial assumption is invalid.
+        Thus
+        $ d(x_i) + weight(x_i, x_{i+1}) = d(x_{i+1}), \; 0 \le i < n $
+        and $ r(x_i, x_{i+1}) = 0 $
+        and therefore all edges of $ Z $ are admissible
+        and they are in the graph $ \Gamma_d $.
         \\
 
-        $ \Leftarrow $ fff
+        $ \Leftarrow $ $ \Gamma_d $ under some distance estimate $ d_k $
+        has a cycle
+        $ C = (x_0, x_1, \dots, x_{n-1}, x_n) $ with $ x_0 = x_n $.
+        To prove: there is a negative or zero weight cycle in $ \Gamma $.
+
+        $ C $ is in the graph $ \Gamma_d $.
+        Therefore its edges are admissible:
+        \begin{equation}
+            \label{eq:cycle-sum}
+            \begin{aligned}
+                r(x_i, x_{i+1}) \le 0, \; 0 \le i < n \\
+                d(x_i) + weight(x_i, x_{i+1}) - d(x_{i+1}) \le 0, \; 0 \le i < n \\
+                d(x_i) + weight(x_i, x_{i+1}) \le d(x_{i+1}), \; 0 \le i < n \\
+                \mathrm{apply \; summation \; along \; the \; cycle} \\
+                \sum_{i=0}^{n-1} d(x_i) + \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le \sum_{i=0}^{n-1} d(x_{i+1}) \\
+                 \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
+                 \mathrm{the \; two \; sums \; on \; the \; right \; are \; equal \; (see \; Equation~\ref{eq:sum-along-cycle})} \\
+                 \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le 0 \\
+            \end{aligned}
+        \end{equation}
+        The left hand side expression in the final inequality
+        in Equation~\ref{eq:cycle-sum} is the length of the cycle $ C $
+        which is less than or equal to zero.
     \end{proof}
 \end{theorem}
-~
-\begin{figure}[htb]
-    \begin{center}
-        \begin{tabular}{cc}
-            \begin{minipage}{0.45\linewidth}
-                \begin{center}
-                    \input{pictures/fig-neg-cycle-1.tex}
-                \end{center}
-            \end{minipage}
-            &
-            \begin{minipage}{0.45\linewidth}
-                \begin{center}
-                    \input{pictures/fig-neg-cycle-2.tex}
-                \end{center}
-            \end{minipage}
-        \end{tabular}
-    \end{center}
-    \caption{Example of negative cycles in graphs.}
-    \label{fig:negative-cycles-in-graphs}
-\end{figure}
-~
+
 \begin{Algorithm}
     \caption{An algorithm for checking if $ \phi $ which corresponds
         to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
@@ -382,17 +413,3 @@ expresses this idea more formally.
         \RETURN (SAT, \varnothing) \\
     \end{algorithm}
 \end{Algorithm}
-Some notes to the Algorithm~\ref{alg:goldberg-radzik}:
-\begin{itemize}
-    \item In practice, checking $ \Gamma_d $ for a cycle (line~9) and
-    computing a set of vertices reachable from $ B $ (line~15) can be
-    done by only one DFS call.
-    However, it is two logically distinct steps and therefore they
-    are performed separately in the algorithm.
-    \item Unexplored vertices (line~15) are vertices which have
-    status $ unreached $ \ie they have not been processed yet at that
-    particular step.
-    \item If $ B $ is empty or no unexplored vertices
-    are reachable from it (line~15) then $ A $ will be assigned an
-    empty set.
-\end{itemize}
