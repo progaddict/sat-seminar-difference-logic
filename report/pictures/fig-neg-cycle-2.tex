@@ -1,0 +1,18 @@
+\begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+    \node[state] (s) at (0, 0) {$s$};
+    \node[state] (u) at (2, 0) {$u$};
+    \node[state] (v) at (4, 2) {$v$};
+    \node[state] (w) at (6, 0) {$w$};
+    \node[state] (x) at (8, 2) {$x$};
+    \node[state] (y) at (8, -2) {$y$};
+    \node[state] (z) at (4, -2) {$z$};
+    
+    \draw [->] (s) -- node[anchor=south, sloped] {1} (u);
+    \draw [->] (u) -- node[anchor=south, sloped] {-1} (v);
+    \draw [->] (v) -- node[anchor=south, sloped] {-1} (w);
+    \draw [->] (w) -- node[anchor=south, sloped] {-1} (x);
+    \draw [->] (x) -- node[anchor=south, sloped] {1} (y);
+    \draw [->] (y) -- node[anchor=south, sloped] {-1} (w);
+    \draw [->] (w) -- node[anchor=south, sloped] {1} (z);
+    \draw [->] (z) -- node[anchor=south, sloped] {-1} (u);
+\end{tikzpicture}

@@ -53,11 +53,11 @@ In~\cite{cotton2004some} it is defined as follows:
         corresponds to one numeric variable occurring in $ x - y \prec c $.
         \item $ E $ is a set of directed edges. Each edge
         $ (x,y) \in E $ corresponds to $ x - y \prec c $.
-        \item $ weight: E \mapsto \mathbb{D} $ is a weight function.
+        \item $ weight(x,y): E \mapsto \mathbb{D} $ is a weight function.
         It maps each edge $ (x,y) \in E $ to the constant
         $ c \in \mathbb{D} $ from the corresponding DL inequality
         $ x - y \prec c $.
-        \item $ op: E \mapsto \{ <, \leq \} $ is a function which
+        \item $ op(x,y): E \mapsto \{ <, \leq \} $ is a function which
         maps each edge $ (x,y) \in E $ to the operation
         $ \prec $ from the corresponding DL inequality
         $ x - y \prec c $.
@@ -121,41 +121,201 @@ which corresponds to the following conflicting inequalities:
 
 \subsection{Bellman-Ford Algorithm for Constraint Graph}
 \cite{cotton2004some} uses a Goldberg-Radzik~\cite{goldberg1993heuristic}
-variant of the Bellman-Ford algorithm
-(Algorithm~\ref{alg:goldberg-radzik}) to detect negative cycles.
+variant of the Bellman-Ford algorithm~\cite[p.651]{cormen2009introduction}
+to detect negative cycles
+and thus check $ \phi $ for SAT
+(Algorithm~\ref{alg:goldberg-radzik}).
 \cite{goldberg1993heuristic}~states that the algorithm has the same
 worst-case complexity $ O(|V| \cdot |E|) $
 as Bellman-Ford algorithm but is superior in practice.
-Important terminology and notation used in the algorithm are given below:
-\begin{itemize}
-    \item The source vertex $ s \in V $ is a vertex from which
+Terminology and notation used in the algorithm are given below.
+\begin{definition}[Source Vertex]
+    The source vertex $ s \in V $ is a vertex from which
     the shortest paths to other vertices are computed.
-    \item $ d(v) \in \mathbb{D} $ is a distance estimate
+\end{definition}
+\begin{definition}[Shortest Path Weight]
+    The shortest path weight~\cite[p.643]{cormen2009introduction}
+    $ \delta(v) $ from the source vertex
+    to $ v \in V $ is defined as the minimal sum of the weights of the edges
+    of a path from the source vertex to $ v $ across all such paths
+    (if at least one exist).
+    If there is no path from the source vertex to $ v $
+    then $ \delta(v) = \infty $.
+    If there is a negative cycle on a path from the source vertex to $ v $
+    then $ \delta(v) = -\infty $.
+\end{definition}
+\begin{definition}[Distance Estimating Function~\cite{cotton2004some}]
+    The distance estimating function $ d(v): V \mapsto \mathbb{D} $
+    is function which returns an upper bound on the distance
     from the source vertex to the given vertex $ v \in V $.
-%    \item $ \pi(v) \in V $ is a parent of $ v \in V $ in a tree
-%    of shortest paths. The tree has the source vertex as its root.
-    \item $ r_d(x,y) = weight(x,y) + d(x) - d(y) $ is
-    the reduced cost function~\cite{goldberg1993heuristic}.
-    It shows if it is possible to improve the distance estimate $ d(y) $
-    by taking a path through the intermediate vertex $ x \in V $.
-    \item $ status(v) = \{ unreached, labeled, scanned \} $
-    is a status of a vertex $ v \in V $.
-    $ status(v) = unreached $ means $ v $ has not been explored yet.
-    $ status(v) = labeled $ means $ v $ has been explored \ie
+\end{definition}
+\begin{definition}[Reduced Cost Function~\cite{goldberg1993heuristic}]
+    The reduced cost function
+    $ r_d(x,y): V \mapsto \mathbb{D} $ is
+    defined as follows:
+    $ r_d(x,y) = weight(x,y) + d(x) - d(y) $.
+\end{definition}
+\begin{definition}[Vertex Status]
+    The vertex status
+    $ status(x) = \{ unreached, labeled, scanned \} $
+    is a function on vertices which shows a current state of
+    a vertex $ x \in V $.
+    $ status(x) = unreached $ means $ x $ has not been explored yet.
+    $ status(x) = labeled $ means $ x $ has been explored \ie
     the distance estimate for it has been updated at least once
     and potentially it can be used to improve distance estimates to
     other vertices.
-    $ status(v) = scanned $ means $ v $ has been completely explored
+    $ status(x) = scanned $ means $ x $ has been completely explored
     and will not be considered further for improving distance estimates.
-    \item Edge $ (x,y) \in E $ is called admissible if $ r_d(x,y) < 0 $
-    \ie this edge can improve the current distance estimate for
-    the vertex $ y \in V $.
-    \item Admissible graph $ \Gamma_d $ is a subgraph
+\end{definition}
+\begin{definition}[Admissible Edge]
+    Edge $ (x,y) \in E $ is called admissible if $ r_d(x,y) \leq 0 $.
+\end{definition}
+\begin{definition}[Admissible Graph]
+    Admissible graph $ \Gamma_d $ is a subgraph
     of $ \Gamma $ composed of the admissible edges of $ \Gamma $.
-    It is dynamic because it depends on the distance estimates
-    which may change at each iteration of
-    the Algorithm~\ref{alg:goldberg-radzik}.
-\end{itemize}
+\end{definition}
+
+In Algorithm~\ref{alg:goldberg-radzik} distance estimates are iteratively
+updated.
+In~\cite[p.648]{cormen2009introduction} this process
+is called "iterative edge relaxation".
+It can also be seen as a series of different distance
+estimate functions $ (d_0, d_1, d_2, d_3, \dots) $.
+Each $ d_i $ in this series describes which distance estimates
+have the vertices at some iteration of
+the Algorithm~\ref{alg:goldberg-radzik}.
+
+The idea of the Algorithm~\ref{alg:goldberg-radzik} is to use
+the dynamically changing graph $ \Gamma_d $
+(it changes whenever $ d $ changes)
+to detect negative or zero cycles in the original graph $ \Gamma $.
+The following theorem from~\cite{cotton2004some}
+expresses this idea more formally.
+\begin{theorem}
+    \label{the:neg-cycle-in-cg}
+    Given a constraint graph $ \Gamma $ and a series of distance estimating
+    functions $ (d_0, d_1, d_2, d_3, \dots) $, $ \Gamma $ has a negative
+    or zero cycle if and only if $ \Gamma_d $ has a cycle under some
+    distance estimate $ d_k $.
+    \begin{proof}
+        $ \Rightarrow $ Case 1. $ \Gamma $ has a negative cycle
+        $ N = (x_0, x_1, \dots, x_{n-1}, x_n) $ with $ x_n = x_0 $.
+        To prove:
+        $ \Gamma_d $ also has this cycle.
+        In~\cite[pp.672-673]{cormen2009introduction} it
+        is proven that if a graph has a negative cycle,
+        then the distance estimation process $ (d_0, d_1, d_2, d_3, \dots) $
+        will never converge.
+        Therefore, for sufficiently large $ k $ there always will be some
+        edge from $ N $ which can further update current $ d_k $ \ie
+        $ \exists i, 0 \leq i < n: d_k(x_i) + weight(x_i, w_{i+1}) < d_k(x_{i+1}) $.
+
+        It can be the case that at some further iteration a
+        path $ p = s \rightarrow x_{i+1} $
+        from the source vertex $ s $ to $ x_{i+1} $
+        will be discovered and this path may give even better improvement
+        than the mentioned one for $ d_k $
+        \ie $ len(p) < d_k(x_i) + weight(x_i, w_{i+1}) $
+        where $ len(p) $ is the length of the path $ p $.
+        In this situation an edge from the path $ p $
+        will be applied to update $ d $ and therefore
+        edge $ (x_i, x_{i+1}) $
+        will be excluded from $ \Gamma_d $
+        because in this case
+        $ r_d(x_i,x_{i+1}) = weight(x_i,x_{i+1}) + d_m(x_i) - d_m(x_{i+1}) = weight(x_i,x_{i+1}) + d_k(x_i) - len(p) > 0 $
+        where $ m > k $ is some further iteration in which
+        the path $ p $ has been used to update distance estimate
+        to the vertex $ x_{i+1} $, \ie $ d_m(x_{i+1}) = len(p) $,
+        and the distance estimate to the
+        vertex $ x_i $ has not been updated, \ie $ d_m(x_i) = d_k(x_i) $.
+        A simple example is given
+        on~Figure~\ref{fig:negative-cycles-in-graphs} on the left
+        where in the very beginning a path $ (s,x) $
+        from $ s $ to $ x $
+        will be the shortest known path until the negative edge
+        $ (w,x) $ is discovered and the path $ (s,v,w,x) $
+        will be shorter.
+
+        Since a graph has a finite number of edges, the number of such
+        paths, which connect $ s $ and a vertex in $ N $, is also finite.
+        Therefore \WLOG we can assume that
+        the $ k $ is sufficiently large and
+        all this paths have already been discovered and applied
+        to improve $ d $.
+        If these paths are not contained in other negative cycles,
+        they cannot be used in further iterations
+        (see "convergence property" and "path relaxation property"
+        in~\cite[p.650]{cormen2009introduction}).
+
+        Suppose, however, that there is another negative cycle which
+        has a connection with $ N $.
+        An example is given
+        on~Figure~\ref{fig:negative-cycles-in-graphs} on the right
+        where the negative cycle $ (u,v,w,z,u) $ has the common vertex
+        $ w $ with another negative cycle $ (w,x,y,w) $.
+        So this cycle can interfere with $ N $ and cause some of the
+        edges of $ N $ to be excluded from $ \Gamma_d $ by providing
+        a better update to the vertex $ x_{i+1} $ than the edge
+        $ (x_i,x_{i+1}) $.
+        However, in order to provide this update to $ x_{i+1} $
+        algorithm needs to enter this cycle and complete it
+        \ie follow all its edges and apply updates.
+        Therefore, again, \WLOG we can regard this interfering
+        negative cycle
+        instead of $ N $.
+
+        Thus, \WLOG let the regarded cycle $ N $ be a cycle
+        which does not interfere with other cycles and
+        let $ k $ be sufficiently large such that all paths, which
+        connect $ s $ with vertices of $ N $
+        and which are not contained in any negative cycles,
+        have already been
+        applied to improve $ d $ and therefore will not be applied
+        in the further iterations.
+        Then the edge $ (x_i,x_{i+1}) $ will trigger a series of updates
+        of $ d $ which will be applied along $ N $.
+        There will be no interference from other negative cycles.
+        Otherwise we would regard them instead of $ N $.
+        There will be no interference from paths,
+        which start at $ s $ and end at some vertex of $ N $,
+        because otherwise we would choose larger $ k $.
+        Therefore after this series of updates, algorithm
+        arrives at some estimate $ d_{k'}, k'>k $ for which
+        the reduced cost function on the edges of $ N $ will be zero
+        or less and therefore the edges of $ N $ will be in $ \Gamma_d $
+        by definition.
+
+        Case 2. $ \Gamma $ has no negative cycles but it has
+        a zero weight cycle $ Z = (x_0, x_1, \dots, x_{n-1}, x_n) $
+        with $ x5_n = x_0 $.
+        Then ...
+        \\
+
+        $ \Leftarrow $ fff
+    \end{proof}
+\end{theorem}
+~
+\begin{figure}[htb]
+    \begin{center}
+        \begin{tabular}{cc}
+            \begin{minipage}{0.45\linewidth}
+                \begin{center}
+                    \input{pictures/fig-neg-cycle-1.tex}
+                \end{center}
+            \end{minipage}
+            &
+            \begin{minipage}{0.45\linewidth}
+                \begin{center}
+                    \input{pictures/fig-neg-cycle-2.tex}
+                \end{center}
+            \end{minipage}
+        \end{tabular}
+    \end{center}
+    \caption{Example of negative cycles in graphs.}
+    \label{fig:negative-cycles-in-graphs}
+\end{figure}
+~
 \begin{Algorithm}
     \caption{An algorithm for checking if $ \phi $ which corresponds
         to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
@@ -183,8 +343,14 @@ Important terminology and notation used in the algorithm are given below:
         A \= \varnothing \\
         B \= \{ s \} \\
         \begin{REPEAT} \\
-            \begin{IF}{\Gamma_d \text{has a cycle (DFS on} \Gamma_d \text{can be used to check it)}}
-                \RETURN (UNSAT, \text{DL constraints corresponding to the detected cycle})
+            \begin{IF}{\Gamma_d \text{has a cycle} C \text{(DFS on} \Gamma_d \text{can be used to check it)}}
+                l \= \text{length of} C \text{in} \Gamma \\
+                \begin{IF}{l < 0}
+                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
+                \end{IF} \\
+                \begin{IF}{\exists \; (x,y) \in L \text{such that} op(x,y) = \; <}
+                    \RETURN (UNSAT, \text{DL constraints corresponding to} L)
+                \end{IF}
             \end{IF} \\
             \begin{FOR}{\mathrm{each \; vertex} \; x \in B}
                 \begin{IF}{x \text{has no outgoing admissible edges}}
@@ -230,28 +396,3 @@ Some notes to the Algorithm~\ref{alg:goldberg-radzik}:
     are reachable from it (line~15) then $ A $ will be assigned an
     empty set.
 \end{itemize}
-
-The admissible graph $ \Gamma_d $ describes a set of possible path
-updates that can be used to improve distance estimates.
-If it contains a cycle then it means that one can
-update distance estimates infinitely by looping along
-this cycle.
-The idea of the Algorithm~\ref{alg:goldberg-radzik} is to det
-\begin{theorem}[Name of the theorem]
-    \label{the:nameOfTheorem}
-    This is how you write a theorem. Do not forget to prove the theorem.
-    \begin{proof}
-        Here you write the proof of the theorem.
-    \end{proof}
-\end{theorem}
-
-
-
-\subsection{Implementation Details}
-Some implementation details (Numeric Conflict Analysis,
-Reducing Feasibility Checks).
-
-
-
-\subsection{Experimental Results}
-Tell a reader about some experimental results.
