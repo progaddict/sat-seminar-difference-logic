@@ -2,8 +2,18 @@
 
 
 
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
 \usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
 \newcommand\eqbydef{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumerate}
 
 \usepackage{xspace}
 \makeatletter
@@ -14,12 +24,18 @@
 \def\ie{{i.e}\onedot}
 \def\Ie{{I.e}\onedot}
 \def\etc{{etc}\onedot}
+\def\etal{{et~al}\onedot}
 \def\WLOG{w.l.o.g\onedot}
-
-\usepackage{xcolor}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows,decorations.pathmorphing,positioning,fit,trees,shapes}
+
+\usepackage{newalg}
+\newtheorem{Algorithm}{Algorithm}
+\floatstyle{ruled}
+\newfloat{Algorithm}{thp}{lop}
+\floatname{Algorithm}{Algorithm}
+\restylefloat{table}
 
 
 
@@ -40,12 +56,15 @@
         \frametitle{Outline}
         \begin{itemize}
             \item Main Literature
-            \item Difference Logic and Why It Is Important
+            \item Difference Logic
+            \item Example Problem: Job Scheduling
             \item SAT Checking of Propositional Logic
             \item SAT Checking of Difference Logic
             \item Constraint Graph
             \item Negative Cycles in a Constraint Graph
             \item How to Find a Negative Cycle in a Graph
+            \item Goldberg-Radzik Heuristic
+            \item SAT Checking Algorithm for Difference Logic (Sketch)
             \item Conclusion
         \end{itemize}
     \end{frame}
@@ -55,17 +74,20 @@
     \begin{frame}
         \frametitle{Main Literature}
         \begin{itemize}
-            \item Scott Cotton, Eugene Asarin, Oded Maler
+            \item \textcolor{blue}{[Cotton \etal 2004]}
+            Scott Cotton, Eugene Asarin, Oded Maler
             and Peter Niebert. \textbf{``Some progress in
             satisfiability checking for difference logic``}.
             In Formal Techniques, Modelling and Analysis
             of Timed and Fault-Tolerant Systems,
             pages 263--276. Springer, 2004.
-            \item Andrew V. Goldberg and Tomasz Radzik.
-            \textbf{``A heuristic improvement of the Bellman-Ford
-                algorithm``}.
+            \item \textcolor{blue}{[Goldberg+Radzik 1993]}
+            Andrew V. Goldberg and Tomasz Radzik.
+            \textbf{``A heuristic improvement of
+                the Bellman-Ford algorithm``}.
             Applied Mathematics Letters, 6(3):3–6, 1993.
-            \item Thomas H. Cormen, Charles E. Leiserson,
+            \item \textcolor{blue}{[Cormen \etal 2009]}
+            Thomas H. Cormen, Charles E. Leiserson,
             Ronald L. Rivest and Clifford Stein.
             \textbf{``Introduction to algorithms``}.
             MIT press, third edition, 2009.
@@ -79,7 +101,7 @@
 
 
     \begin{frame}
-        \frametitle{Difference Logic and Why It Is Important}
+        \frametitle{Difference Logic}
         \begin{itemize}
             \item Difference logic (DL) is a special case of
             linear arithmetic (LA) logic.
@@ -100,7 +122,7 @@
 
 
     \begin{frame}
-        \frametitle{Difference Logic and Why It Is Important}
+        \frametitle{Difference Logic}
         \begin{itemize}
             \item A couple of examples:
         \end{itemize}
@@ -128,7 +150,7 @@
 
 
     \begin{frame}
-        \frametitle{Scheduling Problem Example}
+        \frametitle{Example Problem: Job Scheduling}
         \begin{figure}[htb]
             \begin{tikzpicture}
                 \draw[thick,->] (-1,-1.5) -- (10,-1.5);
@@ -149,8 +171,8 @@
                 \draw (7.98,-1.5) -- (7.98,-1.5)
                             node[anchor=north] {$ \textcolor{blue}{t_2}+\tau_2 $};
 
-                \draw[color=red] (9.46,0.5) -- (9.46,-1.5);
-                \draw (9.46,-1.5) -- (9.46,-1.5)
+                \draw[color=red] (9.49,0.5) -- (9.49,-1.5);
+                \draw (9.49,-1.5) -- (9.49,-1.5)
                             node[anchor=north] {$ \textcolor{blue}{t_4}+\tau_4 $};
 
                 \draw[color=green] (9.8,0.5) -- (9.8,-1.5);
@@ -197,7 +219,7 @@
 
 
     \begin{frame}
-        \frametitle{Scheduling Problem Example}
+        \frametitle{Example Problem: Job Scheduling}
         \begin{equation*}
             \begin{aligned}
                 \phi &= \bigwedge_{j=1}^{4} (p_{1j} \lor p_{2j}) \quad \land \\
@@ -216,15 +238,37 @@
 
     \begin{frame}
         \frametitle{SAT Checking of Propositional Logic}
+        \begin{columns}[T]
+            \begin{column}{.4\textwidth}
+                \begin{equation*}
+                    \phi = (a \lor b) \land (b \lor c) \land (c \lor a) \land \dots
+                \end{equation*}
+                SAT checking = intelligent search in the model space.
+                The model space can be represented as a tree.
+            \end{column}
+            \begin{column}{.4\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {1.33\linewidth} {!} {
+                        \input{pictures/fig-example-decide.tex}
+                    }
+                \end{figure}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{SAT Checking of Propositional Logic}
         \begin{figure}[htb]
             \begin{tikzpicture}
             \tikzstyle{block} = [draw, rectangle]
 
             \node [block] (formula) {$ \phi $};
             \node [block, below = 0.5cm of formula] (BCP) {BCP};
-            \node [draw, ellipse, right = 5cm of BCP] (unsat) {UNSAT};
+            \node [draw, ellipse, color=red, right = 5cm of BCP] (unsat) {UNSAT};
             \node [block, below = 0.5cm of BCP] (decide) {Decide};
-            \node [draw, ellipse, right = 3.5cm of decide] (sat) {SAT};
+            \node [draw, ellipse, color=green, right = 3.5cm of decide] (sat) {SAT};
             \node [block, below = 1cm of decide] (BCP2) {BCP};
             \node [block, right = 2cm of BCP2] (resolve) {Resolve};
             \draw[->] (formula) -- (BCP);
@@ -304,6 +348,9 @@
                 \end{equation*}
             \end{column}
         \end{columns}
+        \begin{equation*}
+            \Gamma = (V, E, weight, op)
+        \end{equation*}
     \end{frame}
     
 
@@ -349,7 +396,359 @@
     
     \begin{frame}
         \frametitle{How to Find a Negative Cycle in a Graph}
-        ttt
+        \begin{itemize}
+            \item First idea: enumerate all cycles
+            \begin{itemize}
+                \item and check if they are negative \\
+                ($ 0 \prec c $ conflict clause where $ c < 0$
+                and $ \prec \in \{ <, \le \} $)
+                \item or they have zero weight and an edge with a strict inequality \\
+                ($ 0 < 0 $ conflict clause)
+            \end{itemize}
+            \item Johnson algorithm solves the cycles enumeration problem
+            \begin{itemize}
+                \item $ O((|V|+|E|) \cdot (C+1)) $ time complexity,
+                where $ C $ is number of elementary cycles
+            \end{itemize}
+            \item \textcolor{blue}{Any problems with this approach?}
+        \end{itemize}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{figure}[htb]
+            \begin{tikzpicture}
+            \node [draw, circle] (x1) {$ x_1 $};
+            \node [draw, circle, right = of x1] (x2) {$ x_2 $};
+            \node [draw, circle, right = of x2] (x3) {$ x_3 $};
+            \node [draw, circle, right = of x3] (x4) {$ x_4 $};
+            \node [draw, circle, right = of x4] (x5) {$ x_5 $};
+            \draw (x1) -- (x2) -- (x3) -- (x4) -- (x5);
+            \node [draw, circle, below = of x1] (x6) {$ x_6 $};
+            \node [draw, circle, right = of x6] (x7) {$ x_7 $};
+            \node [draw, circle, right = of x7] (x8) {$ x_8 $};
+            \node [draw, circle, right = of x8] (x9) {$ x_9 $};
+            \node [draw, circle, right = of x9] (x10) {$ x_{10} $};
+            \draw (x6) -- (x7) -- (x8) -- (x9) -- (x10);
+            \draw (x6) -- (x1) -- (x7) -- (x2) -- (x8) -- (x3) -- (x9) -- (x4) -- (x10) -- (x5);
+            \node [draw, circle, below = of x6] (x11) {$ x_{11} $};
+            \node [draw, circle, right = of x11] (x12) {$ x_{12} $};
+            \node [draw, circle, right = of x12] (x13) {$ x_{13} $};
+            \node [draw, circle, right = of x13] (x14) {$ x_{14} $};
+            \node [draw, circle, right = of x14] (x15) {$ x_{15} $};
+            \draw (x11) -- (x12) -- (x13) -- (x14) -- (x15);
+            \draw (x6) -- (x11) -- (x7) -- (x12) -- (x8) -- (x13) -- (x9) -- (x14) -- (x10) -- (x15);
+            \end{tikzpicture}
+        \end{figure}
+        \begin{itemize}
+            \item \textcolor{blue}{Problem:} a graph can have
+            exponentially many cycles
+            \item \Eg extreme case: fully connected graph
+            \begin{itemize}
+                \item Number of cycles =
+                $ \sum_{i=2}^{n} \binom{i}{n} \frac{i!}{2} $
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{itemize}
+            \item Use Bellman-Ford algorithm for this
+            task~\textcolor{blue}{[Cormen \etal 2009]}
+            \begin{itemize}
+                \item $ O(|V| \cdot |E|) $ time complexity
+            \end{itemize}
+        \end{itemize}
+        \begin{algorithm}{Bellman-Ford}
+            {\text{graph} \Gamma = (V,E,weight), \text{source vertex} s \in V}
+            \begin{FOR}{\mathrm{each \; vertex} \; x \in V}
+                d(x) = \infty
+            \end{FOR} \\
+            d(s) = 0 \\
+            \begin{FOR}{i = 1 \; \mathrm{to} \; |V|-1}
+                \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
+                    \begin{IF}{\textcolor{blue}{d(x) + weight(x,y) < d(y)}}
+                        \textcolor{blue}{
+                            d(y) = d(x) + weight(x,y)
+                        }
+                    \end{IF}
+                \end{FOR}
+            \end{FOR} \\
+            \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
+                \begin{IF}{d(x) + weight(x,y) < d(y)}
+                    \RETURN False
+                \end{IF}
+            \end{FOR} \\
+            \RETURN True
+        \end{algorithm}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{itemize}
+            \item \textcolor{blue}{[Cotton \etal 2004]}
+            uses the \textcolor{blue}{admissible graph}
+            $ \Gamma_d $ to find
+            a negative or zero weight cycle in the original
+            constraint graph~$ \Gamma $
+            \item Terminology:
+            \begin{itemize}
+                \item Reduced cost function
+                $ r(x,y) = weight(x,y) + d(x) - d(y) $
+                \item Admissible edge:
+                $ r_d(x,y) \; \textcolor{blue}{\leq} \; 0 $
+                \item Admissible graph $ \Gamma_d $ -- a graph
+                consisting of admissible edges
+            \end{itemize}
+            \item Implications:
+            \begin{itemize}
+                \item $ \Gamma_d $ is \textcolor{blue}{dynamic}
+                because it depends
+                on $ d $ which changes during
+                the execution of the algorithm
+                \item If $ r(x,y) < 0 $ then the edge $ (x,y) $
+                can be "relaxed" \ie used to improve $ d(y) $
+                \item $ \Gamma_d $ consists of
+                edges which might potentially be used to improve $ d $
+                \item Intuition: if $ \Gamma_d $ has a cycle then
+                this cycle might be used to update $ d $
+                infinitely
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{columns}[T]
+            \begin{column}{.48\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {\linewidth} {!} {
+                        \begin{tikzpicture}[state/.style={draw, circle, fill=none,text centered, text=black}]
+                        \node[state, label={$ d(s) = 0 $}] (s) at (0, 2) {$s$};
+                        \node[state, label={$ d(x_1) = 1 $}] (x1) at (3, 2) {$x_1$};
+                        \node[state, label={$ d(x_2) = 6 $}] (x2) at (6, 2) {$x_2$};
+                        \node[state, label={-90:$ d(x_3) = 3 $}] (x3) at (6, 0) {$x_3$};
+                        \node[state, label={-90:$ d(x_4) = \infty $}] (x4) at (3, 0) {$x_4$};
+                        \node[state, label={-90:$ d(x_5) = \infty $}] (x5) at (0, 0) {$x_5$};
+                        \draw [->] (s) -- node[anchor=south] {1} (x1);
+                        \draw [->] (x1) -- node[anchor=south] {5} (x2);
+                        \draw [->] (x2) -- node[anchor=east] {-3} (x3);
+                        \draw [->] (x3) -- node[anchor=north] {-1} (x4);
+                        \draw [->] (x4) -- node[anchor=north] {-5} (x5);
+                        \draw [->] (x4) -- node[anchor=east] {-1} (x1);
+                        \end{tikzpicture}
+                    }
+                \caption{$ \Gamma $}
+                \end{figure}
+            \end{column}
+            \hfill
+            \begin{column}{.48\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {\linewidth} {!} {
+                        \begin{tikzpicture}[state/.style={draw, circle, fill=none, text centered, text=black}]
+                        \node[state] (s) at (0, 2) {$s$};
+                        \node[state] (x1) at (3, 2) {$x_1$};
+                        \node[state] (x2) at (6, 2) {$x_2$};
+                        \node[state] (x3) at (6, 0) {$x_3$};
+                        \node[state] (x4) at (3, 0) {$x_4$};
+                        \node[state] (x5) at (0, 0) {$x_5$};
+                        \draw [->] (s) -- node[anchor=south] {0} (x1);
+                        \draw [->] (x1) -- node[anchor=south] {0} (x2);
+                        \draw [->] (x2) -- node[anchor=east] {0} (x3);
+                        \draw [->, color=blue] (x3) -- node[anchor=north] {$ -\infty $} (x4);
+                        \end{tikzpicture}
+                    }
+                    \caption{$ \Gamma_d $}
+                \end{figure}
+            \end{column}
+        \end{columns}
+        \begin{equation*}
+                r(x,y) = weight(x,y) + d(x) - d(y)
+        \end{equation*}
+        \begin{center}
+            \begin{tabular}{c c c}
+                $ r(s,x_1) = 0 $ & $ r(x_1,x_2) = 0 $ & $ r(x_2,x_3) = 0 $ \\
+                $ r(x_3,x_4) = -\infty $ & $ r(x_4,x_1) = \infty $ & $ r(x_4,x_5) = \varnothing $ \\
+            \end{tabular}
+        \end{center}
+        $ \Gamma_d $ has no cycles. Let us relax the edge
+        \textcolor{blue}{$ (x_3, x_4) $}
+    \end{frame}
+
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{columns}[T]
+            \begin{column}{.48\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {\linewidth} {!} {
+                        \begin{tikzpicture}[state/.style={draw, circle, fill=none,text centered, text=black}]
+                        \node[state, label={$ d(s) = 0 $}] (s) at (0, 2) {$s$};
+                        \node[state, label={$ d(x_1) = 1 $}] (x1) at (3, 2) {$x_1$};
+                        \node[state, label={$ d(x_2) = 6 $}] (x2) at (6, 2) {$x_2$};
+                        \node[state, label={-90:$ d(x_3) = 3 $}] (x3) at (6, 0) {$x_3$};
+                        \node[state, label={-90:$ \textcolor{blue}{d(x_4) = 2} $}] (x4) at (3, 0) {$x_4$};
+                        \node[state, label={-90:$ d(x_5) = \infty $}] (x5) at (0, 0) {$x_5$};
+                        \draw [->] (s) -- node[anchor=south] {1} (x1);
+                        \draw [->] (x1) -- node[anchor=south] {5} (x2);
+                        \draw [->] (x2) -- node[anchor=east] {-3} (x3);
+                        \draw [->] (x3) -- node[anchor=north] {-1} (x4);
+                        \draw [->] (x4) -- node[anchor=north] {-5} (x5);
+                        \draw [->] (x4) -- node[anchor=east] {-1} (x1);
+                        \end{tikzpicture}
+                    }
+                    \caption{$ \Gamma $}
+                \end{figure}
+            \end{column}
+            \hfill
+            \begin{column}{.48\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {\linewidth} {!} {
+                        \begin{tikzpicture}[state/.style={draw, circle, fill=none, text centered, text=black}]
+                        \node[state] (s) at (0, 2) {$s$};
+                        \node[state] (x1) at (3, 2) {$x_1$};
+                        \node[state] (x2) at (6, 2) {$x_2$};
+                        \node[state] (x3) at (6, 0) {$x_3$};
+                        \node[state] (x4) at (3, 0) {$x_4$};
+                        \node[state] (x5) at (0, 0) {$x_5$};
+                        \draw [->] (s) -- node[anchor=south] {0} (x1);
+                        \draw [->] (x1) -- node[anchor=south] {0} (x2);
+                        \draw [->] (x2) -- node[anchor=east] {0} (x3);
+                        \draw [->, color=blue] (x3) -- node[anchor=north] {$ \textcolor{blue}{0} $} (x4);
+                        \draw [->, color=blue] (x4) -- node[anchor=north] {$ \textcolor{blue}{-\infty} $} (x5);
+                        \draw [->, color=blue] (x4) -- node[anchor=east] {\textcolor{blue}{0}} (x1);
+                        \end{tikzpicture}
+                    }
+                    \caption{$ \Gamma_d $}
+                \end{figure}
+            \end{column}
+        \end{columns}
+        \begin{equation*}
+            r(x,y) = weight(x,y) + d(x) - d(y)
+        \end{equation*}
+        \begin{center}
+            \begin{tabular}{c c c}
+                $ r(s,x_1) = 0 $ & $ r(x_1,x_2) = 0 $ & $ r(x_2,x_3) = 0 $ \\
+                $ \textcolor{blue}{r(x_3,x_4) = 0} $ & $ \textcolor{blue}{r(x_4,x_1) = 0} $ & $ \textcolor{blue}{r(x_4,x_5) = -\infty} $ \\
+            \end{tabular}
+        \end{center}
+        Now $ \Gamma_d $ has a cycle:
+        \textcolor{blue}{$ x_1 \rightarrow x_2 \rightarrow x_3 \rightarrow x_4 \rightarrow x_1 $}.
+        This cycle in $ \Gamma $ has indeed zero weight.
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{How to Find a Negative Cycle in a Graph}
+        \begin{theorem}
+            \label{the:neg-cycle-in-cg}
+            Given a constraint graph $ \Gamma $ and a series of distance estimating
+            functions $ (d_0, d_1, d_2, d_3, \dots) $, $ \Gamma $ has a negative
+            or zero cycle if and only if $ \Gamma_d $ has a cycle under some
+            distance estimate $ d_k $.
+            \begin{proof}
+                Use ``proof-by-contradiction`` approach.
+                \\
+                $ \Rightarrow $ Use the following fact inferred
+                from~\textcolor{blue}{[Cormen \etal 2009]}.
+                When $ \Gamma $ has
+                a negative cycle then the series
+                $ (d_0, d_1, d_2, d_3, \dots) $
+                will \textcolor{blue}{never converge}.
+                \\
+                $ \Leftarrow $ Cycle is in $ \Gamma_d $
+                therefore all its edges are
+                \textcolor{blue}{admissible}
+                and therefore
+                $ d(x_i) + weight(x_i, x_{i+1}) \le d(x_{i+1}) $.
+                Sum the latter inequality along all the edges of the
+                cycle and show that the cycle's weight will be
+                non-positive:
+                $ \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le 0 $
+                \\
+                For the full proof please see my seminar paper
+                or~\textcolor{blue}{[Cotton~\etal~2004]}.
+            \end{proof}
+        \end{theorem}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{Goldberg-Radzik Heuristic}
+        \begin{itemize}
+            \item \textcolor{blue}{[Goldberg+Radzik 1993]} suggests
+            a heuristic to speed up Bellman-Ford algorithm
+            in \textcolor{blue}{practical cases}.
+            \item The theoretical upper bound stays the same:
+            $ O(|V| \cdot |E|) $
+            \item Idea:
+            \begin{itemize}
+                \item Mark vertices as ``unreached``, ``labeled``
+                and ``scanned`` (vertex status)
+                \item In the beginning of each \textcolor{blue}{pass}
+                take vertices that have at least one outgoing admissible
+                edge -- set $ B $
+                \item Also, mark those vertices that have no outgoing
+                admissible edges as ``scanned``
+                \item Calculate set $ A $ -- unexplored vertices
+                (\ie ``unreached``) which are reachable from $ B $
+                in \textcolor{blue}{$ \Gamma_d $}
+                \item \textcolor{blue}{Sort $ A $ topologically using
+                $ \Gamma_d $
+                as the input graph}
+                \item Execute a \textcolor{blue}{pass}:
+                \begin{itemize}
+                    \item For each vertex in $ A $ relax all
+                    outgoing admissible edges (of course, if they
+                    can be relaxed \ie if $ r(x,y) < 0 $)
+                \end{itemize}
+                \item Execute passes until all the vertices are scanned
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{SAT Checking Algorithm for Difference Logic (Sketch)}
+        \begin{figure}[htb]
+            \begin{tikzpicture}
+            \tikzstyle{block} = [draw, rectangle]
+            \node [block] (formula) {$ \phi $};
+            \node [block, right = 0.5cm of formula, text width=2cm, align=center] (cg) {Constraint Graph $ \Gamma $};
+            \node [block, right = 0.5cm of cg, text width=2cm, align=center] (init1) {Initialize distances, statuses \etc};
+            \node [block, below = 0.5cm of init1, text width=2cm, align=center] (checkCycle) {Does $ \Gamma_d $ has a cycle?};
+            \node [block, right = of checkCycle, text width=2cm, align=center] (hasCycle) {Does the cycle correspond to a conflict?};
+            \node [draw, ellipse, color=red, above = 0.5cm of hasCycle] (unsat) {UNSAT};
+            \node [block, below = 0.5cm of hasCycle, text width=3cm, align=center] (admissibleEdges) {Are there admissible unscanned edges?};
+            \node [draw, ellipse, color=green, below = 0.5cm of admissibleEdges] (sat) {SAT};
+            \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply Goldberg-Radzik pass $ \Rightarrow $ update distances and statuses};
+
+            \draw[->] (formula) -- (cg);
+            \draw[->] (cg) -- (init1);
+            \draw[->] (init1) -- (checkCycle);
+            \draw[->] (checkCycle) -- node[anchor=south] {yes} (hasCycle);
+            \draw[->] (checkCycle) -- node[anchor=south] {no} (admissibleEdges);
+            \draw[->] (hasCycle) -- node[anchor=west] {yes} (unsat);
+            \draw[->] (hasCycle) -- node[anchor=west] {no} (admissibleEdges);
+            \draw [->] (admissibleEdges) -- node[anchor=west] {no} (sat);
+            \draw [->] (admissibleEdges) -- node[anchor=south] {yes} (applyGR);
+            \draw [->] (applyGR) -- (checkCycle);
+            \end{tikzpicture}
+        \end{figure}
     \end{frame}
 
 
@@ -357,9 +756,26 @@
     \begin{frame}
         \frametitle{Conclusion}
         \begin{itemize}
-            \item a
-            \item b
-            \item c
+            \item Many timing problems (logistics, planning, scheduling,
+            circuits checking) can be expressed in DL.
+            Therefore it is important to have an efficient algorithm
+            for checking SAT of a DL formula.
+            \item Conjunction of DL constraints can be represented
+            by a constraint graph $ \Gamma $.
+            \begin{itemize}
+                \item A negative cycle corresponds to a conflict
+                $ 0 \prec c $ where $ c < 0 $
+                and $ \prec \in \{ <, \le \} $.
+                \item A zero weight cycle with a strict inequality
+                edge corresponds to a conflict
+                $ 0 < 0 $.
+            \end{itemize}
+            \item There is no need to enumerate all cycles in $ \Gamma $.
+            Bellman-Ford algorithm can be used to detect a negative
+            cycle in~$ O(|V| \cdot |E|) $ operations.
+            \item A cycle in admissible graph $ \Gamma_d $
+            corresponds to a negative or zero weight cycle in
+            the corresponding constraint graph $ \Gamma $.
         \end{itemize}
     \end{frame}
 

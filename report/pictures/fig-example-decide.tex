@@ -19,20 +19,20 @@
     \node[state] (n15) at (7, 0) {$m_8$};
 
     \path[every node/.style={sloped,anchor=south,auto=false}]
-        (n1) edge[dotted] node {$False$} (n2)
+        (n1) edge[dashed] node {$False$} (n2)
         (n1) edge node {$True$} (n3)
 
-        (n2) edge[dotted] node {$False$} (n4)
-        (n2) edge[dotted] node {$True$} (n5)
+        (n2) edge[dashed] node {$False$} (n4)
+        (n2) edge[dashed] node {$True$} (n5)
         (n3) edge[dashed] node {$False$} (n6)
-        (n3) edge[dotted] node {$True$} (n7)
+        (n3) edge node {$True$} (n7)
 
-        (n4) edge[dotted] node {$False$} (n8)
-        (n4) edge[dotted] node {$True$} (n9)
-        (n5) edge[dotted] node {$False$} (n10)
-        (n5) edge[dotted] node {$True$} (n11)
-        (n6) edge[dotted] node {$False$} (n12)
-        (n6) edge[dotted] node {$True$} (n13)
-        (n7) edge[dotted] node {$False$} (n14)
-        (n7) edge[dotted] node {$True$} (n15);
+        (n4) edge[dashed] node {$False$} (n8)
+        (n4) edge[dashed] node {$True$} (n9)
+        (n5) edge[dashed] node {$False$} (n10)
+        (n5) edge[dashed] node {$True$} (n11)
+        (n6) edge[dashed] node {$False$} (n12)
+        (n6) edge[dashed] node {$True$} (n13)
+        (n7) edge node {$False$} (n14)
+        (n7) edge[dashed] node {$True$} (n15);
 \end{tikzpicture}
