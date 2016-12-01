@@ -2,7 +2,22 @@
 
 
 
+\usepackage{amsmath}
+\newcommand\eqbydef{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+
+\usepackage{xspace}
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\def\eg{{e.g}\onedot}
+\def\Eg{{E.g}\onedot}
+\def\ie{{i.e}\onedot}
+\def\Ie{{I.e}\onedot}
+\def\etc{{etc}\onedot}
+\def\WLOG{w.l.o.g\onedot}
+
 \usepackage{xcolor}
+
 \usepackage{tikz}
 \usetikzlibrary{arrows,decorations.pathmorphing,positioning,fit,trees,shapes}
 
@@ -201,28 +216,133 @@
 
     \begin{frame}
         \frametitle{SAT Checking of Propositional Logic}
-        ttt
+        \begin{figure}[htb]
+            \begin{tikzpicture}
+            \tikzstyle{block} = [draw, rectangle]
+
+            \node [block] (formula) {$ \phi $};
+            \node [block, below = 0.5cm of formula] (BCP) {BCP};
+            \node [draw, ellipse, right = 5cm of BCP] (unsat) {UNSAT};
+            \node [block, below = 0.5cm of BCP] (decide) {Decide};
+            \node [draw, ellipse, right = 3.5cm of decide] (sat) {SAT};
+            \node [block, below = 1cm of decide] (BCP2) {BCP};
+            \node [block, right = 2cm of BCP2] (resolve) {Resolve};
+            \draw[->] (formula) -- (BCP);
+            \draw [->] (BCP) -- node[anchor=south] {conflict} (unsat);
+            \draw [->] (BCP) -- (decide);
+            \draw [->] (decide) -- node[anchor=south] {all variables are set} (sat);
+            \draw [->] (decide) -- node[anchor=west] {set next variable} (BCP2);
+            \draw [->] (BCP2) -- node[anchor=north] {conflict} (resolve);
+            \draw [->] (BCP2) edge[bend left=90] node[anchor=east] {no conflict} (decide);
+            \draw [->] (resolve) edge[bend right=30] node[anchor=west] {cannot resolve} (unsat);
+            \draw [->] (resolve) edge[bend left=90] node[anchor=north] {can resolve} (BCP2);
+            \end{tikzpicture}
+        \end{figure}
     \end{frame}
 
 
 
     \begin{frame}
         \frametitle{SAT Checking of Difference Logic}
-        ttt
+        \begin{figure}[htb]
+            \resizebox {0.55\linewidth} {!} {
+                \input{pictures/fig-lazy-approach.tex}
+            }
+            \caption{Lazy approach}
+        \end{figure}
+    \end{frame}
+
+
+
+    \begin{frame}
+        \frametitle{SAT Checking of Difference Logic}
+        \begin{figure}[htb]
+            \resizebox {0.9\linewidth} {!} {
+                \input{pictures/fig-incremental-approach.tex}
+            }
+            \caption{Incremental approach}
+        \end{figure}
     \end{frame}
 
 
 
     \begin{frame}
         \frametitle{Constraint Graph}
-        ttt
+        \begin{columns}[T]
+            \begin{column}{.4\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {\linewidth} {!} {
+                        \input{pictures/fig-example-cg-1.tex}
+                    }
+                \end{figure}
+                \begin{equation*}
+                    \begin{aligned}
+                    \phi_2 &= (u-v < 1) \\
+                    & \land (v-w < 5) \\
+                    & \land (w-x \leq -3) \\
+                    & \land (x-y < 1) \\
+                    & \land (y-z \leq -5) \\
+                    & \land (y-v \leq 0) \\
+                    \end{aligned}
+                \end{equation*}
+            \end{column}
+            \begin{column}{.4\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {1.33\linewidth} {!} {
+                        \input{pictures/fig-example-cg-2.tex}
+                    }
+                \end{figure}
+                \begin{equation*}
+                    \begin{aligned}
+                    \phi_3 &= (u-v < 1) \\
+                    & \land (v-w < 5) \\
+                    & \land (w-x \leq -3) \\
+                    & \land (x-y < -3) \\
+                    & \land (y-z \leq -5) \\
+                    & \land (y-w < 4) \\
+                    \end{aligned}
+                \end{equation*}
+            \end{column}
+        \end{columns}
     \end{frame}
     
-    
+
     
     \begin{frame}
         \frametitle{Negative Cycles in a Constraint Graph}
-        ttt
+        \begin{columns}[T]
+            \begin{column}{.4\textwidth}
+                Negative cycle
+                $ x \rightarrow y \rightarrow w \rightarrow x $
+                \begin{equation*}
+                    \begin{aligned}
+                    x - y & < -3 \\
+                    y - w & < \;\;\; 4 \\
+                    w - x & \leq -3 \\
+                    \hline
+                    \textcolor{red}{0} \; & \textcolor{red}{< -2}
+                    \end{aligned}
+                    \end{equation*}
+                    \textcolor{red}{A conflict!}
+            \end{column}
+            \begin{column}{.4\textwidth}
+                \begin{figure}[htb]
+                    \resizebox {1.33\linewidth} {!} {
+                        \input{pictures/fig-example-cg-2.tex}
+                    }
+                \end{figure}
+                \begin{equation*}
+                \begin{aligned}
+                \phi_3 &= (u-v < 1) \\
+                & \land (v-w < 5) \\
+                & \land (w-x \leq -3) \\
+                & \land (x-y < -3) \\
+                & \land (y-z \leq -5) \\
+                & \land (y-w < 4) \\
+                \end{aligned}
+                \end{equation*}
+            \end{column}
+        \end{columns}
     \end{frame}
     
     
