@@ -1,4 +1,4 @@
-\section{Topic}
+\section{Theory Solver ormFor Difference Logic}
 \label{sec:topic}
 
 
@@ -216,8 +216,6 @@ Terminology and notation used in the algorithm are given below.
     $ r(x,y) = weight(x,y) + d(x) - d(y) $.
 \end{definition}
 
-\newpage
-
 \begin{definition}[Vertex Status]
     The vertex status
     $ status(x) = \{ unreached, labeled, scanned \} $
@@ -250,20 +248,6 @@ Each $ d_i $ in this series describes which distance estimates
 have the vertices at some iteration of
 the Algorithm~\ref{alg:goldberg-radzik}.
 
-\begin{figure}[htb]
-    \begin{center}
-        \begin{tabular}{c}
-            \begin{minipage}{0.95\linewidth}
-                \begin{center}
-                    \input{pictures/fig-edge-relaxation.tex}
-                \end{center}
-            \end{minipage}
-        \end{tabular}
-    \end{center}
-    \caption{Multiple paths from $ s $ to $ y $
-        may be used to improve distance estimate to $ x $.}
-    \label{fig:edge-relaxation}
-\end{figure}
 The idea of the Algorithm~\ref{alg:goldberg-radzik} is to use
 the dynamically changing graph $ \Gamma_d $
 (it changes whenever $ d $ changes)
@@ -277,135 +261,4 @@ expresses this idea more formally.
     functions $ (d_0, d_1, d_2, d_3, \dots) $, $ \Gamma $ has a negative
     or zero cycle if and only if $ \Gamma_d $ has a cycle under some
     distance estimate $ d_k $.
-    \begin{proof}
-        $ \Rightarrow $ Case 1. $ \Gamma $ has a negative cycle.
-        To prove: $ \Gamma_d $ has a cycle at some distance estimate $ d_k $.
-
-        Suppose $ \Gamma_d $ has no cycles at any distance estimate
-        (the initial assumption).
-        Consider an arbitrary edge $ (x,y) \in \Gamma_d $
-        at some distance estimate $ d_k $ for which $ r(x,y) < 0 $
-        \ie this edge can be relaxed.
-        If we apply relaxation to this edge then we change the
-        distance estimate to some $ d_{k+1} $ by updating
-        distance estimate for the vertex $ y $ to a smaller value:
-        \begin{equation}
-            \label{eq:edge-relaxation}
-            \begin{aligned}
-                r(x,y) < 0 \Rightarrow d_k(x) + weight(x,y) < d_k(y) \\
-                d_{k+1}(y) = d_k(x) + weight(x,y)
-            \end{aligned}
-        \end{equation}
-        Immediately after this operation
-        we will have that $ r(x,y) = 0 $ and thus
-        the edge will still be in $ \Gamma_d $ but relaxation
-        cannot be applicable to it.
-        It can be the case, however, that this edge will be relaxed
-        again in some further iterations.
-        Since there are no cycles in $ \Gamma_d $,
-        multiple updates are only possible
-        when there are some better paths $ p_1, p_2, \dots p_n $
-        from the source vertex $ s $
-        to $ x $ (Figure~\ref{fig:edge-relaxation}).
-        These paths can be used to update distance estimate
-        for the vertex $ x $ and make possible relaxation
-        of the edge $ (x,y) $.
-        Number of these paths cannot be infinite
-        because the graph has finite number of vertices and edges.
-        Therefore the edge $ (x,y) $ will be relaxed finitely many
-        times.
-        Then $ r(x,y) $ will become zero at some iteration and
-        the edge will stay in $ \Gamma_d $ for all further iterations.
-
-        The above reasoning has been applied to an arbitrary edge
-        $ (x,y) $ for which we have $ r(x,y) < 0 $ at some distance
-        estimate $ d_k $ during the execution of the algorithm.
-        This reasoning can be repeated for all other edges and
-        it can be concluded therefore that
-        after some finite number of iterations no
-        distance updates will be possible, because for any edge
-        $ (x,y) \in \Gamma $ we will have $ r(x,y) \ge 0 $.
-        Thus, the distance update process will converge.
-        However, in~\cite[p.653]{cormen2009introduction} it has been
-        proven that, in case when $ \Gamma $ has a negative cycle,
-        the distance update process does not converge.
-        Therefore we have a contradiction and the initial assumption
-        is wrong.
-        Thus, $ \Gamma_d $ will have a cycle at some distance estimate.
-        \\
-
-        Case 2. $ \Gamma $ has no negative cycles but it has
-        a zero weight cycle $ Z = (x_0, x_1, \dots, x_{n-1}, x_n) $
-        with $ x_n = x_0 $.
-        To prove: $ \Gamma_d $ has a cycle at some distance estimate $ d_k $.
-
-        In this case the distance estimate process
-        will converge to some function
-        $ d_k $ which means that there is no edge that can be relaxed,
-        including the edges of $ Z $:
-        \begin{equation}
-            \label{eq:triangle-inequlity}
-            d(x_i) + weight(x_i, x_{i+1}) \ge d(x_{i+1}), \; 0 \le i < n
-        \end{equation}
-        Let us sum the inequality from Equation~\ref{eq:triangle-inequlity}
-        along the cycle $ Z $:
-        \begin{equation}
-            \label{eq:sum-along-cycle}
-            \begin{aligned}
-                \sum_{i=0}^{n-1} d(x_i) + \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \ge \sum_{i=0}^{n-1} d(x_{i+1}) \\
-                \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \ge \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
-                Z \; \mathrm{has \; zero \; weight} \\
-                0 \ge \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
-                \mathrm{apply \; index \; renaming \; to \; the \; first \; sum} \\
-                0 \ge \sum_{i=1}^{n} d(x_i) - \sum_{i=0}^{n-1} d(x_i) \\
-                \mathrm{since} \; x_0 = x_n \; \mathrm{the \; two \; sums \; are \; actually \; equal} \\
-                0 \ge 0
-            \end{aligned}
-        \end{equation}
-        The final inequality in Equation~\ref{eq:sum-along-cycle}
-        is valid and is a consequence of the convergence.
-
-        Now assume that there is at least one edge
-        $ (x_i,x_{i+1}) $
-        along the cycle $ Z $
-        for which we have
-        $ d(x_i) + weight(x_i, x_{i+1}) > d(x_{i+1}) $
-        (the initial assumption).
-        Then, if we do the summation
-        in Equation~\ref{eq:sum-along-cycle} again,
-        we will get a strict inequality $ 0 > 0 $
-        which is invalid.
-        Thus, we have a contradiction with the convergence condition
-        and therefore the initial assumption is invalid.
-        Thus
-        $ d(x_i) + weight(x_i, x_{i+1}) = d(x_{i+1}), \; 0 \le i < n $
-        and $ r(x_i, x_{i+1}) = 0 $
-        and therefore all edges of $ Z $ are admissible
-        and they are in the graph $ \Gamma_d $.
-        \\
-
-        $ \Leftarrow $ $ \Gamma_d $ under some distance estimate $ d_k $
-        has a cycle
-        $ C = (x_0, x_1, \dots, x_{n-1}, x_n) $ with $ x_0 = x_n $.
-        To prove: there is a negative or zero weight cycle in $ \Gamma $.
-
-        $ C $ is in the graph $ \Gamma_d $.
-        Therefore its edges are admissible:
-        \begin{equation}
-            \label{eq:cycle-sum}
-            \begin{aligned}
-                r(x_i, x_{i+1}) \le 0, \; 0 \le i < n \\
-                d(x_i) + weight(x_i, x_{i+1}) - d(x_{i+1}) \le 0, \; 0 \le i < n \\
-                d(x_i) + weight(x_i, x_{i+1}) \le d(x_{i+1}), \; 0 \le i < n \\
-                \mathrm{apply \; summation \; along \; the \; cycle} \\
-                \sum_{i=0}^{n-1} d(x_i) + \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le \sum_{i=0}^{n-1} d(x_{i+1}) \\
-                 \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le \sum_{i=0}^{n-1} d(x_{i+1}) - \sum_{i=0}^{n-1} d(x_i) \\
-                 \mathrm{the \; two \; sums \; on \; the \; right \; are \; equal \; (see \; Equation~\ref{eq:sum-along-cycle})} \\
-                 \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le 0 \\
-            \end{aligned}
-        \end{equation}
-        The left hand side expression in the final inequality
-        in Equation~\ref{eq:cycle-sum} is the length of the cycle $ C $
-        which is less than or equal to zero.
-    \end{proof}
 \end{theorem}

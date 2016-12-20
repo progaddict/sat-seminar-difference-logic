@@ -1,20 +1,22 @@
 \section{Conclusion}
 \label{sec:conclusion}
-DL logic is widely used to describe timing-related problems.
-Although, it is possible to use simplex to solve SAT problem
-of DL constraints, nevertheless there is a more efficient
-graph-based algorithm.
+Difference logic is widely used to describe timing-related problems.
+Since difference logic is a special case of linear arithmetic logic,
+it is possible to employ simplex to decide satisfiability
+of difference logic constraints.
+However, simplex has exponential complexity whereas the graph-based
+algorithm, described in this report, has polynomial complexity.
 
 The algorithm works on a constraint graph which represents
-a conjunction of DL constraints.
+a conjunction of difference logic constraints.
 The idea of the algorithm is based on the fact that
 negative or zero length cycles in the constraint graph
-correspond to a sequence of DL inequalities which,
+correspond to a sequence of difference logic inequalities which,
 if summed together, will produce a conflicting
 inequality $ 0 < 0 $ or $ 0 \prec c $ where
 $ c $ is a negative constant and $ \prec \; \in \{ <, \le \} $.
 The inequalities, which correspond to the cycle,
-are used to form the explanation for the SAT solver.
+form the explanation for the SAT solver.
 
 The ingenious thing about the algorithm is that it does not
 enumerate all the cycles in a constraint graph but rather

@@ -10,42 +10,28 @@ algorithm~\cite{davis1960computing, davis1962machine}
 for solving SAT problem of the propositional logic (PL).
 One such basic SAT checking algorithm is given below.
 \begin{Algorithm}
-    \caption{A basic SAT checking algorithm for solving SAT problem of PL.
-        It takes a PL formula to be checked for SAT and
-        returns SAT status of the formula (SAT or UNSAT).
-        It also returns a model \ie an assignment, which evaluates
-        the formula to $ True $, in case if the formula is SAT.}
+    \caption{A basic satisfiability checking algorithm for deciding
+        satisfiability problem of propositional logic.}
     \label{alg:basic-sat}
-    \begin{algorithm}{Check}
-        {\text{PL formula} \phi}
-        model \= \varnothing \\
-        (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\
-        conflictHasArisen \= conflictingClauses \neq \varnothing \\
-        \begin{IF}{conflictHasArisen}
-            \RETURN (UNSAT, \NIL)
+    \begin{algorithm}{Check}{}
+        \begin{IF}{! \: \CALL{Propagate}()}
+            \RETURN UNSAT
         \end{IF} \\
-        model\=model \cup inferredAssignments \\
         \begin{WHILE}{True}
-            (nextVariable, value) \= \CALL{Decide}(\phi, model) \\
-            allVariablesHaveAlreadyBeenAssigned \= nextVariable = \NIL \\
-            \begin{IF}{allVariablesHaveAlreadyBeenAssigned}
-                \RETURN (SAT, model)
-            \end{IF} \\
-            model \= model \cup \{ nextVariable \= value \} \\
-            \begin{REPEAT} \\
-                (inferredAssignments, conflictingClauses) \= \CALL{Propagate}(\phi, model) \\
-                model \= model \cup inferredAssignments \\
-                conflictHasArisen \= conflictingClauses \neq \varnothing \\
-                \begin{IF}{conflictHasArisen}
-                    (newModelWithoutConflict, \phi_a) \= \CALL{Resolve}(\phi, model, conflictingClauses) \\
-                    conflictHasNotBeenResolved \= newModelWithoutConflict = \NIL \\
-                    \begin{IF}{conflictHasNotBeenResolved}
-                        \RETURN (UNSAT, \NIL)
-                    \end{IF} \\
-                    model \= newModelWithoutConflict \\
-                    \phi \= \phi \land \phi_a
+            \begin{IF}{! \: \CALL{Theory}()}
+                \begin{IF}{! \: \CALL{Resolve}()}
+                    \RETURN UNSAT
                 \end{IF}
-            \end{REPEAT} \neg conflictHasArisen
+                \ELSE
+                \begin{IF}{! \: \CALL{Decide}()}
+                    \RETURN SAT
+                \end{IF}
+            \end{IF} \\
+            \begin{WHILE}{! \: \CALL{Propagate}()}
+                \begin{IF}{! \: \CALL{Resolve}()}
+                    \RETURN UNSAT
+                \end{IF}
+            \end{WHILE}
         \end{WHILE}
     \end{algorithm}
 \end{Algorithm}
@@ -63,30 +49,21 @@ following functions:
     the model by the returned assignments.
     \item[$ \algCALL{Decide} $] This function applies some heuristic and
     selects a variable to be set next and a value.
-    \item[\algCALL{Resolve}] This function tries to resolve a conflict.
+    \item[$ \algCALL{Resolve} $] This function tries to resolve a conflict.
+    It returns a new model without the conflict and
+    an asserting clause $ \phi_a $.
+    If the conflict cannot be resolved, the function returns $ \algNIL $
+    instead of the model.
+    \item[$ \algCALL{Theory} $] This function tries to resolve a conflict.
     It returns a new model without the conflict and
     an asserting clause $ \phi_a $.
     If the conflict cannot be resolved, the function returns $ \algNIL $
     instead of the model.
 \end{itemize}
 
-In the Algorithm~\ref{alg:basic-sat} a model is represented by
-a mapping from PL variables of the input PL formula to Booleans.
-It is a simplification.
-Real-world SAT solvers maintain a lot of additional information
-such as decision levels, assignment order of variables for every
-decision level, an implicant for
-every variable (\ie the clause from which the variable's
-value was inferred during the $ \algCALL{Propagate} $) \etc
-
-Additionally, a care should be taken when resolving a conflict and
-computing a new model.
-The solver should make sure it visits each state associated with
-a model once only.
 
 
-
-\subsection{Solving SAT Problem of Difference Logic}
+\subsection{Approaches to Decide Satisfiability of Difference Logic}
 \begin{figure}[htb]
     \begin{center}
         \begin{tabular}{lr}

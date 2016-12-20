@@ -1,22 +1,17 @@
 \begin{abstract}
-    This report describes the difference logic (DL) and a graph-based
-    approach for solving satisfiability (SAT) problem of DL formulas.
-    There is of course a simplex-based algorithm which solves
-    SAT problem of any linear arithmetic (LA) constraints.
-    However, it is not efficient compared to the algorithm described
-    here because simplex does not utilize the simple structure of
-    DL constraints.
+    This report describes difference logic, which is a special case
+    of linear arithmetic logic, and a graph-based
+    algorithm for deciding satisfiability (SAT) of
+    a conjunction of difference logic flormulas.
+    There is of course a simplex-based algorithm, which can also
+    do that.
+    However, it has exponential complexity whereas
+    the graph-based algorithm, described here,
+    has polynomial complexity.
 
-    Efficiently solving SAT problem of DL constraints is very
-    important because a lot of timing related problems can be described
-    by this logic \eg scheduling problems, detecting race conditions
-    in digital circuits \etc
-
-    The report is organized as follows.
-    Chapter~\ref{sec:introduction} introduces difference logic.
-    Chapter~\ref{sec:preliminaries} gives theoretical background
-    on SAT checking.
-    Chapter~\ref{sec:topic} describes a graph-based approach to solving
-    SAT problem of DL.
-    Chapter~\ref{sec:conclusion} draws a conclusion.
+    Difference logic constraints appear in many timing related problems
+    such as \eg scheduling problems,
+    detecting race conditions in digital circuits \etc
+    Therefore it is very important to have an efficient algorithm
+    to decide whether they are satisfiable or not.
 \end{abstract}
