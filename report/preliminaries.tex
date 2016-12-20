@@ -7,8 +7,10 @@
 Most of the SAT solvers employ a variation of the
 Davis-Putnam-Logemann-Loveland (DPLL)
 algorithm~\cite{davis1960computing, davis1962machine}
-for solving SAT problem of the propositional logic (PL).
-One such basic SAT checking algorithm is given below.
+for deciding satisfiability of propositional logic.
+Algorithm~\ref{alg:basic-sat} is an example of
+such a basic satisfiability checking algorithm.
+
 \begin{Algorithm}
     \caption{A basic satisfiability checking algorithm for deciding
         satisfiability problem of propositional logic.}
@@ -36,29 +38,28 @@ One such basic SAT checking algorithm is given below.
     \end{algorithm}
 \end{Algorithm}
 
-The Algorithm~\ref{alg:basic-sat} is quite generic.
+Algorithm~\ref{alg:basic-sat} is quite generic.
 It is more of a template.
 One needs to plug into this template his own implementations of the
 following functions:
 \begin{itemize}
-    \item[$ \algCALL{Propagate} $] This function calculates
-    all assignments that follow from a given PL formula
-    and a given model.
-    It also returns a list of conflicting clauses (if there are any).
-    These clauses will be in conflict if one extends
-    the model by the returned assignments.
-    \item[$ \algCALL{Decide} $] This function applies some heuristic and
-    selects a variable to be set next and a value.
-    \item[$ \algCALL{Resolve} $] This function tries to resolve a conflict.
-    It returns a new model without the conflict and
-    an asserting clause $ \phi_a $.
-    If the conflict cannot be resolved, the function returns $ \algNIL $
-    instead of the model.
-    \item[$ \algCALL{Theory} $] This function tries to resolve a conflict.
-    It returns a new model without the conflict and
-    an asserting clause $ \phi_a $.
-    If the conflict cannot be resolved, the function returns $ \algNIL $
-    instead of the model.
+    \item[$ \algCALL{Propagate} $] Propagates
+    current variable assignments
+    and returns $ True $ iff
+    the propagation has not run into a conflict.
+    \item[$ \algCALL{Decide} $] Tries to extend
+    current variable assignments
+    by selecting a next variable
+    and setting it to a value
+    according to some heuristic
+    and returns $ False $ iff
+    all variables have been already set
+    (nothing to assign).
+    \item[$ \algCALL{Resolve} $] Tries to resolve a conflict
+    and returns $ True $ iff it has been successfully resolved.
+    \item[$ \algCALL{Theory} $] Checks current variable
+    assignments and returns $ True $ iff it is consistent
+    with the theory.
 \end{itemize}
 
 
@@ -83,42 +84,58 @@ following functions:
     \caption{Illustration of the lazy (left) and incremental (right) approaches.}
     \label{fig:lazy-and-incremental-approaches}
 \end{figure}
+
 \cite{cotton2004some} mentions the following main approaches for
-solving SAT problem of DL:
+solving satisfiability problem of difference logic:
 \begin{itemize}
-    \item Preprocessing approach. This approach suggests transforming a DL
-    formula into an equivalent PL formula by encoding all intrinsic
-    dependencies between DL constraints in PL.
+    \item Preprocessing approach.
+    This approach suggests transforming a difference logic
+    formula into an equivalent propositional logic formula
+    by encoding all intrinsic
+    dependencies between difference logic constraints
+    in propositional logic.
     An example of such a dependency is transitivity:
     \begin{equation}
         \label{eq:transitivity-example}
         (x-y<a) \land (y-z<b) \rightarrow (x-z<a+b)
     \end{equation}
-    After the transformation a SAT solver can be used to check SAT of
-    the resulting equivalent PL formula.
-    If the PL formula is SAT then the solution for the original DL formula
-    can be constructed by the reverse transformation.
+    After the transformation a SAT solver can be used
+    to check if the resulting
+    equivalent propositional formula
+    is satisfiable.
+    If it is satisfiable then the solution for
+    the original formula can be constructed
+    by the reverse transformation.
     \item Lazy approach
     (Figure~\ref{fig:lazy-and-incremental-approaches} left).
-    This approach suggests substituting each DL constraint
+    This approach suggests substituting
+    each difference logic constraint
     $ x-y \prec c $ with
-    a Boolean variable $ p_{xyc} \in \mathbb{B} $ thus yielding
-    a PL formula~$ \phi' $.
-    $ \phi' $ represents the "skeleton", the Boolean abstraction over
-    the original DL formula $ \phi $.
-    Then a SAT solver is used in tandem with a DL constraints checker (the
-    theory solver) to solve SAT problem.
-    In this approach the SAT solver always computes a complete solution
+    a Boolean variable $ p_{xyc} \in \mathbb{B} $
+    thus yielding a propositional logic formula~$ \phi' $.
+    $ \phi' $ represents the "skeleton",
+    the Boolean abstraction over
+    the original formula $ \phi $.
+    Then a SAT solver is used in tandem with
+    a difference logic constraints checker (the theory solver)
+    to solve the satisfiability problem.
+    In this approach the SAT solver always computes
+    a complete solution (variable assignments for all
+    variables)
     which is then passed to the theory solver.
     \item Incremental approach
     (Figure~\ref{fig:lazy-and-incremental-approaches} right).
     In~\cite{cotton2004some} this approach is used.
     It is very similar to the lazy one.
     However, instead of computing a complete solution,
-    the SAT solver invokes the DL constraints checker
-    each time it updates its model.
-    The DL constraints checker should be able to maintain some internal
-    state of the currently received DL constraints and update it
+    the SAT solver invokes the difference logic
+    constraints checker
+    each time it updates its variable assignments
+    and passes the constrains checker a partial solution.
+    The constraints checker
+    should be able to maintain some internal
+    state of the currently received
+    difference logic constraints and update it
     incrementally (\ie add new constraints, delete existing ones).
     Hence the name of the approach.
 \end{itemize}
