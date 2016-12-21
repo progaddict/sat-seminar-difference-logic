@@ -28,7 +28,7 @@ as follows:
     the usual ways in terms of conjunction $ \land $ and negation $ \neg $.
 \end{definition}
 
-The main difference between linear arithmetic
+The main difference between linear arithmetic logic
 and difference logic is that in the latter
 constraints contain only two variables.
 A difference logic constraint is essentially
@@ -65,20 +65,20 @@ Difference logic can also describe constraints
 $ x \prec c $ and $ -x \prec c $.
 One rewrites them as
 $ x - 0 \prec c $ and $ 0 - x \prec c $ respectively
-and then introduces a pseudo-variable~$ z $
+and then introduces a pseudo-variable~$ zero \notin \mathcal{X} $
 instead of zero. An example:
 
 \begin{equation}
     \begin{aligned}
         (v < 3) \land (-w \le -4) \\
         (v - 0 < 3) \land (0 - w \le -4) \\
-        (v - z < 3) \land (z - w \le -4) \\
+        (v - zero < 3) \land (zero - w \le -4) \\
     \end{aligned}
 \end{equation}
 
 Algorithm~\ref{alg:goldberg-radzik} is compatible
-with the pseudo-variable $ z $ in the sense
-that introducing this pseudo-variable $ z $
+with the pseudo-variable $ zero $ in the sense
+that introducing $ zero $
 does not break the reasoning, on which the algorithm
 is based.
 Since this algorithm constitutes the core of
@@ -95,7 +95,7 @@ by difference logic. An example:
         (v > -3) \land (-w \ge 4) \\
         (-v < 3) \land (w \le -4) \\
         (0-v < 3) \land (w-0 \le -4) \\
-        (z-v < 3) \land (w-z \le -4)
+        (zero-v < 3) \land (w-zero \le -4)
     \end{aligned}
 \end{equation}
 
@@ -113,7 +113,7 @@ An example:
         (\neg ((v < -3) \lor (v > -3))) \land ((w < 4) \lor (w > 4)) \\
         (\neg ((v < -3) \lor (-v < 3))) \land ((w < 4) \lor (-w < -4)) \\
         (\neg ((v-0 < -3) \lor (0-v < 3))) \land ((w-0 < 4) \lor (0-w < -4)) \\
-        (\neg ((v-z < -3) \lor (z-v < 3))) \land ((w-z < 4) \lor (z-w < -4)) \\
+        (\neg ((v-zero < -3) \lor (zero-v < 3))) \land ((w-zero < 4) \lor (zero-w < -4)) \\
     \end{aligned}
 \end{equation}
 
@@ -150,8 +150,8 @@ not exceed $ T $? An example setting:
     \end{aligned}
 \end{equation}
 
-Let $ p_{mj} = True $ if job $ j $ is scheduled on machine
-$ m $ and $ p_{mj} = False $ otherwise.
+Let $ p_{mj} = True $ iff job $ j $ is scheduled on machine
+$ m $.
 Let also $ t_j $ be the start time of the job $ j $.
 Then the job scheduling problem for the given example setting
 can be encoded by the following formula:
@@ -171,12 +171,13 @@ can be encoded by the following formula:
 \end{equation}
 Where $ \tau_j $ and $ T $ are real constants
 (the $ c \in \mathbb{D} $
-in Definition~\ref{def:difference-logic}),
+in Definition~\ref{def:difference-logic},
+$ \mathbb{D} = \mathbb{R} $),
 $ p_{mj} $ are boolean variables
-from the $ \mathcal{B} $ set
+from the set $ \mathcal{B} $
 in Definition~\ref{def:difference-logic}
 and $ t_j $ are real variables
-from the $ \mathcal{X} $ set
+from the set $ \mathcal{X} $
 in Definition~\ref{def:difference-logic}
 ($ 1 \le m \le 2, 1 \le j \le 4 $).
 

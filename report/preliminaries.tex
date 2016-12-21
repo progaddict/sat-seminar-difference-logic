@@ -4,16 +4,15 @@
 
 
 \subsection{Solving SAT Problem of Propositional Logic}
-Most of the SAT solvers employ a variation of the
+Most SAT solvers employ a variation of the
 Davis-Putnam-Logemann-Loveland (DPLL)
 algorithm~\cite{davis1960computing, davis1962machine}
 for deciding satisfiability of propositional logic.
-Algorithm~\ref{alg:basic-sat} is an example of
-such a basic satisfiability checking algorithm.
+Algorithm~\ref{alg:basic-sat}
+exemplifies it.
 
 \begin{Algorithm}
-    \caption{A basic satisfiability checking algorithm for deciding
-        satisfiability problem of propositional logic.}
+    \caption{A basic satisfiability checking algorithm for propositional logic.}
     \label{alg:basic-sat}
     \begin{algorithm}{Check}{}
         \begin{IF}{! \: \CALL{Propagate}()}
@@ -44,21 +43,20 @@ One needs to plug into this template his own implementations of the
 following functions:
 \begin{itemize}
     \item[$ \algCALL{Propagate} $] Propagates
-    current variable assignments
+    a current variables assignment
     and returns $ True $ iff
     the propagation has not run into a conflict.
     \item[$ \algCALL{Decide} $] Tries to extend
-    current variable assignments
-    by selecting a next variable
-    and setting it to a value
+    a current variables assignment
+    by assigning a next variable
     according to some heuristic
     and returns $ False $ iff
     all variables have been already set
     (nothing to assign).
     \item[$ \algCALL{Resolve} $] Tries to resolve a conflict
     and returns $ True $ iff it has been successfully resolved.
-    \item[$ \algCALL{Theory} $] Checks current variable
-    assignments and returns $ True $ iff it is consistent
+    \item[$ \algCALL{Theory} $] Checks a current variables
+    assignment and returns $ True $ iff it is consistent
     with the theory.
 \end{itemize}
 
@@ -104,7 +102,7 @@ solving satisfiability problem of difference logic:
     equivalent propositional formula
     is satisfiable.
     If it is satisfiable then the solution for
-    the original formula can be constructed
+    the original formula can be reconstructed
     by the reverse transformation.
     \item Lazy approach
     (Figure~\ref{fig:lazy-and-incremental-approaches} left).
@@ -120,7 +118,7 @@ solving satisfiability problem of difference logic:
     a difference logic constraints checker (the theory solver)
     to solve the satisfiability problem.
     In this approach the SAT solver always computes
-    a complete solution (variable assignments for all
+    a complete solution (a variables assignment for all
     variables)
     which is then passed to the theory solver.
     \item Incremental approach
@@ -130,8 +128,9 @@ solving satisfiability problem of difference logic:
     However, instead of computing a complete solution,
     the SAT solver invokes the difference logic
     constraints checker
-    each time it updates its variable assignments
-    and passes the constrains checker a partial solution.
+    each time it updates its variables assignment
+    and passes a partial solution
+    to the constrains checker.
     The constraints checker
     should be able to maintain some internal
     state of the currently received
