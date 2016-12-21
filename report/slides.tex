@@ -149,6 +149,36 @@
 
 
 
+
+    \begin{frame}
+        \frametitle{Difference Logic. Special cases}
+        \begin{itemize}
+            \item $ x < c \;\; \Leftrightarrow \;\; x - 0 < c \;\; \Leftrightarrow \;\; x - zero < c $
+            where $ zero $ is a
+            \textcolor{blue}{special variable}
+            which, however, \textcolor{blue}{does not change}
+            the algorithm for deciding SAT of DL formula.
+            \item $ x \ge c \;\; \Leftrightarrow \;\; -x \le -c \;\; \Leftrightarrow \;\; 0 - x \le -c \;\; \Leftrightarrow \;\; zero - x \le -c $
+            \item $ x \neq c \;\; \Leftrightarrow \;\; ((x < c) \lor (x > c)) $
+            and then see above
+            \item $ x = c \;\; \Leftrightarrow \;\; \neg ((x < c) \lor (x > c)) $
+            and then see above
+            \item An example:
+            \begin{equation*}
+                \begin{aligned}
+                    (v = -3) \\
+                    (\neg ((v < -3) \lor (v > -3))) \\
+                    (\neg ((v < -3) \lor (-v < 3))) \\
+                    (\neg ((v-0 < -3) \lor (0-v < 3))) \\
+                    (\neg ((v-zero < -3) \lor (zero-v < 3))) \\
+                \end{aligned}
+            \end{equation*}
+        \end{itemize}
+    \end{frame}
+
+
+
+
     \begin{frame}
         \frametitle{Example Problem: Job Scheduling}
         \begin{figure}[htb]
