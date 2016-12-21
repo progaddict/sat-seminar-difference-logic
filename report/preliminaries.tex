@@ -4,13 +4,6 @@
 
 
 \subsection{Solving SAT Problem of Propositional Logic}
-Most SAT solvers employ a variation of the
-Davis-Putnam-Logemann-Loveland (DPLL)
-algorithm~\cite{davis1960computing, davis1962machine}
-for deciding satisfiability of propositional logic.
-Algorithm~\ref{alg:basic-sat}
-exemplifies it.
-
 \begin{Algorithm}
     \caption{A basic satisfiability checking algorithm for propositional logic.}
     \label{alg:basic-sat}
@@ -37,7 +30,12 @@ exemplifies it.
     \end{algorithm}
 \end{Algorithm}
 
-Algorithm~\ref{alg:basic-sat} is quite generic.
+Most SAT solvers employ a variation of the
+Davis-Putnam-Logemann-Loveland (DPLL)
+algorithm~\cite{davis1960computing, davis1962machine}
+for deciding satisfiability of propositional logic (PL).
+Algorithm~\ref{alg:basic-sat}
+exemplifies it. It is quite generic.
 It is more of a template.
 One needs to plug into this template his own implementations of the
 following functions:

@@ -9,13 +9,16 @@ algorithm, described in this report, has polynomial complexity.
 
 The algorithm works on a constraint graph which represents
 a conjunction of difference logic constraints.
-The idea of the algorithm is based on the fact that
-negative or zero length cycles in the constraint graph
-correspond to a sequence of difference logic inequalities which,
-if summed together, will produce a conflicting
-inequality $ 0 < 0 $ or $ 0 \prec c $ where
-$ c $ is a negative constant and $ \prec \; \in \{ <, \le \} $.
-The inequalities, which correspond to the cycle,
+The idea of the algorithm is
+to find
+a negative or zero length cycle
+in the constraint graph.
+If such a cycle exists
+then it corresponds to a conflict,
+the corresponding formula
+is unsatisfiable
+and the inequalities,
+which correspond to the cycle,
 form the explanation for the SAT solver.
 
 The ingenious thing about the algorithm is that it does not

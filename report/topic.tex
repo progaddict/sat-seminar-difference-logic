@@ -1,15 +1,15 @@
-\section{Theory Solver ormFor Difference Logic}
+\section{Theory Solver For Difference Logic}
 \label{sec:topic}
 
 
 
 \subsection{Notation}
-Throughout this Chapter the following notation is used:
+Throughout this chapter the following notation is used:
 \begin{itemize}
-    \item $ \phi $ is a \emph{conjunction} of DL constraints.
-    It is being checked for SAT.
+    \item $ \phi $ is a \emph{conjunction} of difference logic constraints.
+    It is being checked for satisfiability.
     \item $ x - y \prec c $ is a general form
-    of a DL constraint in $ \phi $ where $ \prec \; \in \{ <, \leq \} $.
+    of a constraint in $ \phi $ where $ \prec \; \in \{ <, \leq \} $.
     \item $ \mathbb{D} $ is a domain over which
     the variables and constants in $ \phi $ are defined
     (\eg $ \mathbb{R} $).
@@ -18,6 +18,33 @@ Throughout this Chapter the following notation is used:
 
 
 \subsection{Constraint Graph}
+Constraint graph
+is a weighted directed graph which represents $ \phi $
+and which is used by a difference logic constraints checker
+(Figure~\ref{fig:lazy-and-incremental-approaches}) to test
+if $ \phi $ is SAT.
+In~\cite{cotton2004some} it is defined as follows:
+\begin{definition}[Constraint Graph]
+    \label{def:constraint-graph}
+    Constraint graph is a graph $ \Gamma = (V,E,weight,op) $ where:
+    \begin{itemize}
+        \item $ V $ is a set of vertices. Each vertex $ x \in V $
+        corresponds to one numeric variable occurring in $ x - y \prec c $.
+        \item $ E $ is a set of directed edges. Each edge
+        $ (x,y) \in E $ corresponds to $ x - y \prec c $.
+        \item $ weight(x,y): E \mapsto \mathbb{D} $ is a weight function.
+        It maps each edge $ (x,y) \in E $ to the constant
+        $ c \in \mathbb{D} $ from the corresponding DL inequality
+        $ x - y \prec c $.
+        \item $ op(x,y): E \mapsto \{ <, \leq \} $ is a function which
+        maps each edge $ (x,y) \in E $ to the operation
+        $ \prec $ from the corresponding DL inequality
+        $ x - y \prec c $.
+    \end{itemize}
+\end{definition}
+
+Examples of constraint graphs
+are shown on Figure~\ref{fig:contraints-graphs}.
 \begin{figure}[htb]
     \begin{center}
         \begin{tabular}{cc}
@@ -35,78 +62,65 @@ Throughout this Chapter the following notation is used:
         \end{tabular}
     \end{center}
     \caption{Examples of constraint graphs for
-        Equation~\ref{eq:example-2} (left) and
-        Equation~\ref{eq:example-3} (right).}
+        Equation~\ref{eq:example-1} (left) and
+        Equation~\ref{eq:example-2} (right).}
     \label{fig:contraints-graphs}
 \end{figure}
-Constraint graph (Figure~\ref{fig:contraints-graphs})
-is a weighted directed graph which represents $ \phi $
-and which is used by a DL constraints checker
-(Figure~\ref{fig:lazy-and-incremental-approaches}) to test
-if $ \phi $ is SAT.
-In~\cite{cotton2004some} it is defined as follows:
-\begin{definition}[Constraint Graph]
-    \label{def:constraint-graph}
-    The constraint graph is a graph $ \Gamma = (V,E,weight,op) $ where:
-    \begin{itemize}
-        \item $ V $ is a set of vertices. Each vertex $ x \in V $
-        corresponds to one numeric variable occurring in $ x - y \prec c $.
-        \item $ E $ is a set of directed edges. Each edge
-        $ (x,y) \in E $ corresponds to $ x - y \prec c $.
-        \item $ weight(x,y): E \mapsto \mathbb{D} $ is a weight function.
-        It maps each edge $ (x,y) \in E $ to the constant
-        $ c \in \mathbb{D} $ from the corresponding DL inequality
-        $ x - y \prec c $.
-        \item $ op(x,y): E \mapsto \{ <, \leq \} $ is a function which
-        maps each edge $ (x,y) \in E $ to the operation
-        $ \prec $ from the corresponding DL inequality
-        $ x - y \prec c $.
-    \end{itemize}
-\end{definition}
-
 
 
 
 \subsection{Negative Cycles in Constraint Graph}
-There is a direct correspondence between a negative cycle
-in a constraint graph and SAT of $ \phi $ represented by this graph.
-
-A path in the graph corresponds to a sum of the corresponding
-constraints. \Eg the path
+A path in a constraint graph
+can be used to infer a
+new inequality by applying
+transitivity rule
+(Equation~\ref{eq:transitivity-example}).
+The path
 $ u \rightarrow v \rightarrow w \rightarrow x $
 in the left graph on Figure~\ref{fig:contraints-graphs}
-corresponds to the following sum of the DL inequalities:
+exemplifies it:
+
 \begin{equation}
-    \begin{aligned}
-        u - v & < \;\;\; 1 \\
-        v - w & < \;\;\; 5 \\
-        w - x & \leq -3 \\
-        \hline
-        u - x & < \;\;\; 3
-    \end{aligned}
+\begin{aligned}
+u - v & < \;\;\; 1 \\
+v - w & < \;\;\; 5 \\
+w - x & \leq -3 \\
+\hline
+u - x & < \;\;\; 3
+\end{aligned}
 \end{equation}
+
 If at least one strict inequality is present
 then the resulting inequality will also be strict.
-This summation along a path can also be expressed with
-an inferred transitivity constraint
-(\eg~Equation~\ref{eq:transitivity-example}).
-The transitivity constraint naturally follows from $ \phi $ and
-therefore must be satisfied in order to satisfy $ \phi $.
 
-A cycle in the constraint graph corresponds to an inequality
-$ 0 \prec c $
-which may cause a conflict in the following situations:
-\begin{itemize}
-    \item $ c < 0$
-    \item $ c = 0 $ and $ \prec $ is $ < $
-    (can be checked with $ op $ from Definition~\ref{def:constraint-graph})
-\end{itemize}
+In~\cite{cotton2004some} it is shown
+that a negative cycle
+in a constraint graph
+corresponds to a conflict
+of the form $ 0 \prec c $
+where $ c < 0 $.
+Therefore if a constrain graph has a negative cycle
+then the corresponding formula $ \phi $ is unsatisfiable.
+In the same paper it is also shown
+that if the graph has a zero weight cycle
+then it corresponds to an inequality
+$ 0 \prec 0 $ which represents a conflict
+in case when $ \prec \; = \; < $ \ie when the
+inequality is strict.
+In this case $ \phi $ is also unsatisfiable.
+This case also shows why one needs
+to map edges of a constraint graph
+not only into constants but also
+into types of inequalities (strict or
+non-strict, function $ op $
+in the Definition~\ref{def:constraint-graph}).
 
 An example of a conflict can be seen on the right graph
 on Figure~\ref{fig:contraints-graphs}.
 The conflict corresponds to the negative cycle
 $ x \rightarrow y \rightarrow w \rightarrow x $
 which corresponds to the following conflicting inequalities:
+
 \begin{equation}
     \begin{aligned}
         x - y & < -3 \\
@@ -117,22 +131,28 @@ which corresponds to the following conflicting inequalities:
     \end{aligned}
 \end{equation}
 
+The bottomline: $ \phi $ is unsatisfiable iff the
+corresponding constraint graph has a negative
+cycle or a zero weight cycle with at least
+one strict inequality in it.
+
 
 
 \subsection{Bellman-Ford Algorithm for Constraint Graph}
 \cite{cotton2004some} uses a Goldberg-Radzik~\cite{goldberg1993heuristic}
 variant of the Bellman-Ford algorithm~\cite[p.651]{cormen2009introduction}
-to detect negative cycles
-and thus check $ \phi $ for SAT
+to detect negative and zero weight cycles
+and thus check if $ \phi $ is satisfiable
 (Algorithm~\ref{alg:goldberg-radzik}).
 \cite{goldberg1993heuristic}~states that the algorithm has the same
 worst-case complexity $ O(|V| \cdot |E|) $
 as Bellman-Ford algorithm but is superior in practice.
-Terminology and notation used in the algorithm are given below.
+Terminology and notation used in the algorithm are given
+in the definitions below:
 
 \begin{Algorithm}
     \caption{An algorithm for checking if $ \phi $ which corresponds
-        to the input constraint graph $ \Gamma = (V,E,weight,op) $ is SAT.
+        to the input constraint graph $ \Gamma = (V,E,weight,op) $ is satisfiable.
         It returns SAT or UNSAT status and a set of DL constraints
         corresponding to a conflict (in case of UNSAT).
         It is based on Bellman-Ford
@@ -143,7 +163,11 @@ Terminology and notation used in the algorithm are given below.
         This algorithm uses
         depth first search~\cite[p.603]{cormen2009introduction} (DFS)
         and breadth first search~\cite[p.594]{cormen2009introduction} (BFS)
-        for auxiliary tasks.}
+        for auxiliary tasks.
+        $ \Gamma_d $ is the dynamically changing
+        admissible graph
+        from Definition~\ref{def:admissible-graph}.
+    }
     \label{alg:goldberg-radzik}
     \begin{algorithm}{Goldberg-Radzik}
         {\text{constraint graph} \Gamma = (V,E,weight,op),
@@ -216,6 +240,16 @@ Terminology and notation used in the algorithm are given below.
     $ r(x,y) = weight(x,y) + d(x) - d(y) $.
 \end{definition}
 
+\begin{definition}[Admissible Edge]
+    Edge $ (x,y) \in E $ is called admissible if $ r(x,y) \leq 0 $.
+\end{definition}
+
+\begin{definition}[Admissible Graph]
+    \label{def:admissible-graph}
+    Admissible graph $ \Gamma_d $ is a subgraph
+    of $ \Gamma $ composed of the admissible edges of $ \Gamma $.
+\end{definition}
+
 \begin{definition}[Vertex Status]
     The vertex status
     $ status(x) = \{ unreached, labeled, scanned \} $
@@ -229,31 +263,9 @@ Terminology and notation used in the algorithm are given below.
     $ status(x) = scanned $ means $ x $ has been completely explored
     and will not be considered further for improving distance estimates.
 \end{definition}
-\begin{definition}[Admissible Edge]
-    Edge $ (x,y) \in E $ is called admissible if $ r_d(x,y) \leq 0 $.
-\end{definition}
-\begin{definition}[Admissible Graph]
-    Admissible graph $ \Gamma_d $ is a subgraph
-    of $ \Gamma $ composed of the admissible edges of $ \Gamma $.
-\end{definition}
 
-In Algorithm~\ref{alg:goldberg-radzik} distance estimates are iteratively
-updated.
-In~\cite[p.648]{cormen2009introduction} the act of updating a distance
-estimate using an edge is called ``edge relaxation``
-(Equation~\ref{eq:edge-relaxation}).
-This iterative process can also be seen as a series of different distance
-estimating functions $ (d_0, d_1, d_2, d_3, \dots) $.
-Each $ d_i $ in this series describes which distance estimates
-have the vertices at some iteration of
-the Algorithm~\ref{alg:goldberg-radzik}.
-
-The idea of the Algorithm~\ref{alg:goldberg-radzik} is to use
-the dynamically changing graph $ \Gamma_d $
-(it changes whenever $ d $ changes)
-to detect negative or zero cycles in the original graph $ \Gamma $.
-The following theorem from~\cite{cotton2004some}
-expresses this idea more formally.
+Algorithm~\ref{alg:goldberg-radzik} relies on
+the following theorem:
 
 \begin{theorem}
     \label{the:neg-cycle-in-cg}
@@ -262,3 +274,136 @@ expresses this idea more formally.
     or zero cycle if and only if $ \Gamma_d $ has a cycle under some
     distance estimate $ d_k $.
 \end{theorem}
+
+Theorem~\ref{the:neg-cycle-in-cg} is proven
+in~\cite{cotton2004some}.
+The intuition behind it is the following.
+$ \Gamma_d $ consists of edges which may
+potentially improve some current distance estimate
+function $ d_k $.
+If $ \Gamma_d $ has a cycle then it means that this
+cycle may potentially be used to update
+the distance estimate function $ d_k $
+infinitely many times thus preventing the
+process from convergence.
+As stated in~\cite[p.645]{cormen2009introduction}
+inability to converge means that the single-source
+shortest paths problem is not well defined
+which means that there has to be a negative weight
+cycle which can always be used to improve
+distance estimates.
+
+The whole satisfiability checking process
+of a difference logic formula
+(Figure~\ref{fig:lazy-and-incremental-approaches},~right)
+can be approximately described as follows:
+
+\begin{itemize}
+    \item A boolean skeleton $ \phi' $ is built.
+    \item The SAT solver starts solving $ \phi' $.
+    \item When it modifies a current variables assignment,
+    it maps it to a conjunction of difference logic
+    inequalities and tells the constraints checker
+    what new inequalities need to be added
+    and what previously passed inequalities
+    need to be deleted.
+    \item The constraints checker modifies its
+    state accordingly (\ie the constraint graph
+    and other data structures).
+    \item The constraints checker tries to
+    find a negative or zero cycle
+    which would correspond to a conflict
+    (Algorithm~\ref{alg:goldberg-radzik}).
+    \begin{itemize}
+        \item If it runs into such a conflict
+        then it informs the SAT checker
+        and returns it the inequalities
+        which constitute the cycle
+        as the explanation of
+        the encountered conflict.
+        \item Otherwise it informs the SAT checker
+        that the current variables assignment
+        is consistent with the theory
+        (the $ \algCALL{Theory} $ call
+        in Algorithm~\ref{alg:basic-sat})
+        and the SAT checker continues to
+        search for a solution.
+    \end{itemize}
+\end{itemize}
+
+The described process ends in two cases.
+Either a complete solution is found,
+which is also consistent with the theory.
+It means that the input difference logic formula
+is satisfiable.
+Or the SAT solver has run into a conflict
+which is impossible to resolve.
+It means that the initial formula contains
+a contradiction and thus is unsatisfiable.
+
+As an example consider the difference logic formula
+in Equation~\ref{eq:example-2} as an input:
+\begin{itemize}
+    \item $ \phi' = p_{u,v,1} \land p_{v,w,5} \land p_{w,x,-3} \land p_{x,y,-3} \land p_{y,z,-5} \land p_{y,w,4} $
+    \item The SAT solver starts with a partial assignment
+    $ \{ p_{u,v,1} = True \} $.
+    It tells the constraints checker:
+    "add $ (u - v < 1) $ and check consistency".
+    \item The constraints checker adds the edge $ (u,v) $
+    to the (initially empty) constraints graph,
+    which corresponds to the received inequality.
+    There are no cycles in the graph and therefore
+    the constraints checker informs the SAT checker
+    that the current variables assignment is consistent
+    with the theory.
+    \item The SAT solver continues searching
+    for a solution.
+    It extends a partial assignment to the following
+    assignment:
+    $ \{ p_{u,v,1} = True, p_{v,w,5} = True \} $.
+    It tells the constraints checker:
+    "add $ (v - w < 5) $ and check consistency".
+    \item ...
+    \item At some moment the SAT solver arrives
+    in a state when it has
+    $ \{ p_{u,v,1} = True, p_{v,w,5} = True, p_{w,x,-3} = True, p_{x,y,-3} = True, p_{y,z,-5} = True \} $
+    as the current variables assignment and
+    it extends it with an assignment $ p_{y,w,4} = True $.
+    It tells the constraints checker:
+    "add $ (y - w < 4) $ and check consistency".
+    \item The constraints checker adds
+    the new edge $ (y,w) $ and finds a negative cycle
+    $ w \rightarrow x \rightarrow y \rightarrow w $
+    corresponding to a conflict.
+    The set of inequalities $ \{ (w - x \leq -3),
+    (x - y < -3),
+    (y - w < 4) \} $ correspond to the detected conflict.
+    The constraints checker returns the explanation
+    to the SAT solver:
+    $ \neg ( p_{w,x,-3}
+    \land p_{x,y,-3}
+    \land p_{y,w,4} ) $
+    which can be rewritten as
+    $ ( \neg p_{w,x,-3}
+    \lor \neg p_{x,y,-3}
+    \lor \neg p_{y,w,4} ) $.
+    \item The SAT solver adds the received explanation to
+    $ \phi' $:
+    \begin{equation}
+        \phi'' = \phi' \land ( \neg p_{w,x,-3}
+        \lor \neg p_{x,y,-3}
+        \lor \neg p_{y,w,4} )
+    \end{equation}
+    Then it backtracks to the decision level 0
+    and starts solving $ \phi'' $.
+    It calls $ \algCALL{Propagate} $
+    from Algorithm~\ref{alg:basic-sat}
+    and runs into a conflict.
+    The conflict cannot be resolved because
+    it is detected on the decision level 0.
+    Therefore the SAT solver returns
+    UNSAT as the answer \ie the input
+    difference logic formula from
+    Equation~\ref{eq:example-2}
+    is unsatisfiable.
+\end{itemize}
