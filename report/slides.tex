@@ -435,11 +435,6 @@
                 \item or they have zero weight and an edge with a strict inequality \\
                 ($ 0 < 0 $ conflict clause)
             \end{itemize}
-            \item Johnson algorithm solves the cycles enumeration problem
-            \begin{itemize}
-                \item $ O((|V|+|E|) \cdot (C+1)) $ time complexity,
-                where $ C $ is number of elementary cycles
-            \end{itemize}
             \item \textcolor{blue}{Any problems with this approach?}
         \end{itemize}
     \end{frame}
@@ -474,11 +469,16 @@
         \end{figure}
         \begin{itemize}
             \item \textcolor{blue}{Problem:} a graph can have
-            exponentially many cycles
+            an enormous number of cycles
             \item \Eg extreme case: fully connected graph
             \begin{itemize}
                 \item Number of cycles =
                 $ \sum_{i=2}^{n} \binom{i}{n} \frac{i!}{2} $
+                \item \textcolor{gray}{$ i! $ is divided over 2
+                because \eg permutations
+                $ (1, 2, \dots, i-1, i) $ and
+                $ (i, i-1, \dots, 2, 1) $
+                correspond to the same cycle}
             \end{itemize}
         \end{itemize}
     \end{frame}
