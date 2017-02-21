@@ -45,6 +45,17 @@
 \author{Alex Ryndin \\ Supervisor: Gereon Kremer}
 \date{WS 2016/2017}
 
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{footline}[text line]{
+    \parbox{\linewidth}{
+        \vspace*{-8pt}Difference Logic
+        \hfill
+        Alex Ryndin
+        \hfill
+        \insertpagenumber
+    }
+}
+
 
 
 \begin{document}
@@ -58,13 +69,8 @@
             \item Main Literature
             \item Difference Logic
             \item Example Problem: Job Scheduling
-            \item SAT Checking of Propositional Logic
-            \item SAT Checking of Difference Logic
-            \item Constraint Graph
-            \item Negative Cycles in a Constraint Graph
-            \item How to Find a Negative Cycle in a Graph
-            \item Goldberg-Radzik Heuristic
-            \item SAT Checking Algorithm for Difference Logic (Sketch)
+            \item SAT Checking
+            \item Constraint Graph And Negative Cycles
             \item Conclusion
         \end{itemize}
     \end{frame}
@@ -103,18 +109,16 @@
     \begin{frame}
         \frametitle{Difference Logic}
         \begin{itemize}
-            \item Difference logic (DL) is a special case of
-            linear arithmetic (LA) logic.
-            \item It is a Propositional Logic (PL)
-            enhanced with constraints of the following form:
-            \begin{equation}
+            \item Difference logic -- a special case of
+            linear arithmetic logic,
+            \item in which constraints have the following form:
+            \begin{equation*}
                 x - y \prec c
-            \end{equation}
-            where $ x,y $ are variables, $ c $ is a constant
-            and $ \prec \in \{ <, \le \} $ is a comparison operator.
-            \item $ x,y,c $ can be defined either over
-            Integers $ \mathbb{Z} $
-            or over Reals $ \mathbb{R} $.
+            \end{equation*}
+            $ x,y $ -- variables, $ c $ -- constant
+            and $ \prec \in \{ <, \le \} $ -- comparison operator.
+            \item $ x,y,c $ can be Integers $ \mathbb{Z} $
+            or Reals $ \mathbb{R} $.
         \end{itemize}
     \end{frame}
 
@@ -123,28 +127,34 @@
 
     \begin{frame}
         \frametitle{Difference Logic}
-        \begin{itemize}
-            \item A couple of examples:
-        \end{itemize}
-        \begin{equation}
+        A couple of examples:
+        \begin{equation*}
             \phi_1 = (p \lor q)
             \land (p \rightarrow (u - v < 3.3))
             \land (q \rightarrow (v - w < -5.15))
-        \end{equation}
-        \begin{equation}
+        \end{equation*}
+        \pause
+        \textcolor{blue}{SAT} $ p=True, q=False, u=3, v=0, w=0 $
+        \pause
+        \begin{equation*}
             \begin{aligned}
                 \phi_2 &= (u-v < 1) \land (v-w < 5) \\
                 & \land (w-x \leq -3) \land (x-y < 1) \\
                 & \land (y-z \leq -5) \land (y-v \leq 0) \\
             \end{aligned}
-        \end{equation}
-        \begin{equation}
+        \end{equation*}
+        \pause
+        \textcolor{blue}{SAT} $ u=0, v=3, w=0, x=3, y=3, z=8 $
+        \pause
+        \begin{equation*}
             \begin{aligned}
                 \phi_3 &= (u-v < 1) \land (v-w < 5) \\
                 & \land (w-x \leq -3) \land (x-y < -3) \\
                 & \land (y-z \leq -5) \land (y-w < 4) \\
             \end{aligned}
-        \end{equation}
+        \end{equation*}
+        \pause
+        \textcolor{red}{UNSAT} $ (w - x \leq -3) \land (x - y < -3) \land (y-w < 4) \Rightarrow 0 < -2 $
     \end{frame}
 
 
@@ -154,23 +164,29 @@
         \frametitle{Difference Logic. Special cases}
         \begin{itemize}
             \item $ x < c \;\; \Leftrightarrow \;\; x - 0 < c \;\; \Leftrightarrow \;\; x - zero < c $
-            where $ zero $ is a
-            \textcolor{blue}{special variable}
-            which, however, \textcolor{blue}{does not change}
-            the algorithm for deciding SAT of DL formula.
+            \\
+            $ zero $ -- \textcolor{blue}{special pseudo-variable}
+            \pause
             \item $ x \ge c \;\; \Leftrightarrow \;\; -x \le -c \;\; \Leftrightarrow \;\; 0 - x \le -c \;\; \Leftrightarrow \;\; zero - x \le -c $
+            \pause
             \item $ x \neq c \;\; \Leftrightarrow \;\; ((x < c) \lor (x > c)) $
             and then see above
+            \pause
             \item $ x = c \;\; \Leftrightarrow \;\; \neg ((x < c) \lor (x > c)) $
             and then see above
+            \pause
             \item An example:
             \begin{equation*}
                 \begin{aligned}
                     (v = -3) \\
-                    (\neg ((v < -3) \lor (v > -3))) \\
-                    (\neg ((v < -3) \lor (-v < 3))) \\
-                    (\neg ((v-0 < -3) \lor (0-v < 3))) \\
-                    (\neg ((v-zero < -3) \lor (zero-v < 3))) \\
+                    \pause
+                    \Leftrightarrow \;\; (\neg ((v < -3) \lor (v > -3))) \\
+                    \pause
+                    \Leftrightarrow \;\; (\neg ((v < -3) \lor (-v < 3))) \\
+                    \pause
+                    \Leftrightarrow \;\; (\neg ((v-0 < -3) \lor (0-v < 3))) \\
+                    \pause
+                    \Leftrightarrow \;\; (\neg ((v-zero < -3) \lor (zero-v < 3))) \\
                 \end{aligned}
             \end{equation*}
         \end{itemize}
@@ -205,7 +221,7 @@
                 \draw (9.49,-1.5) -- (9.49,-1.5)
                             node[anchor=north] {$ \textcolor{blue}{t_4}+\tau_4 $};
 
-                \draw[color=green] (9.8,0.5) -- (9.8,-1.5);
+                \draw[color=blue] (9.8,0.5) -- (9.8,-1.5);
                 \draw (9.8,0.5) -- (9.8,0.5)
                             node[anchor=north west] {$ T $};
 
@@ -231,7 +247,6 @@
         on machine $ m $:
         \\
         e.g. $ \textcolor{blue}{p_{11}} = \textcolor{blue}{p_{14}} = \textcolor{blue}{p_{23}} = \textcolor{blue}{p_{22}} = True $
-        for the figure above
         \item job $ i $ starts at $ \textcolor{blue}{t_i} $
         and lasts $ \tau_i $
         \item a machine cannot process two or more jobs
@@ -252,22 +267,37 @@
         \frametitle{Example Problem: Job Scheduling}
         \begin{equation*}
             \begin{aligned}
-                \phi &= \bigwedge_{j=1}^{4} (p_{1j} \lor p_{2j}) \quad \land \\
-                & \mathrm{each \; task \; is \; executed \; on \; at \; least \; one \; machine} \\
-                & \bigwedge_{j=1}^{4} ((p_{1j} \rightarrow \neg p_{2j}) \land (p_{2j} \rightarrow \neg p_{1j})) \quad \land \\
-                & \mathrm{each \; task \; can \; be \; scheduled \; on \; one \; machine\; only } \\
-                & \bigwedge_{j=1}^{4} (t_j \ge 0) \; \land \; \bigwedge_{j=1}^{4} (t_j \le T-\tau_j) \quad \land \\
-                & \mathrm{general \; time \; constraints} \\
-                & \bigwedge_{m=1}^{2} \bigwedge_{i=1}^{3} \bigwedge_{j=i+1}^{4} ((p_{mi} \land p_{mj}) \rightarrow ((t_i-t_j \le -\tau_i) \lor (t_j-t_i \le -\tau_j))) \\
-                & \mathrm{no \; time \; overlap \; rule} \\
+                \phi &= \bigwedge_{j=1}^{4} (\textcolor{blue}{p_{1j}} \lor \textcolor{blue}{p_{2j}}) \quad \land \\
             \end{aligned}
         \end{equation*}
+        \begin{center}Each task is executed on at least one machine\end{center}
+        \pause
+        \begin{equation*}
+        \begin{aligned}
+        & \bigwedge_{j=1}^{4} ((\textcolor{blue}{p_{1j}} \rightarrow \neg \textcolor{blue}{p_{2j}}) \land (\textcolor{blue}{p_{2j}} \rightarrow \neg \textcolor{blue}{p_{1j}})) \quad \land \\
+        \end{aligned}
+        \end{equation*}
+        \begin{center}Each task can be scheduled on one machine only\end{center}
+        \pause
+        \begin{equation*}
+        \begin{aligned}
+        & \bigwedge_{j=1}^{4} (\textcolor{blue}{t_j} \ge 0) \; \land \; \bigwedge_{j=1}^{4} (\textcolor{blue}{t_j} \le T-\tau_j) \quad \land \\
+        \end{aligned}
+        \end{equation*}
+        \begin{center}General time constraints\end{center}
+        \pause
+        \begin{equation*}
+        \begin{aligned}
+        & \bigwedge_{m=1}^{2} \bigwedge_{i=1}^{3} \bigwedge_{j=i+1}^{4} ((\textcolor{blue}{p_{mi}} \land \textcolor{blue}{p_{mj}}) \rightarrow ((\textcolor{blue}{t_i}-\textcolor{blue}{t_j} \le -\tau_i) \lor (\textcolor{blue}{t_j}-\textcolor{blue}{t_i} \le -\tau_j))) \\
+        \end{aligned}
+        \end{equation*}
+        \begin{center}No time overlap rule\end{center}
     \end{frame}
 
 
 
     \begin{frame}
-        \frametitle{SAT Checking of Propositional Logic}
+        \frametitle{SAT Checking}
         \begin{columns}[T]
             \begin{column}{.4\textwidth}
                 \begin{equation*}
@@ -289,7 +319,7 @@
 
 
     \begin{frame}
-        \frametitle{SAT Checking of Propositional Logic}
+        \frametitle{SAT Checking}
         \begin{figure}[htb]
             \begin{tikzpicture}
             \tikzstyle{block} = [draw, rectangle]
@@ -298,7 +328,7 @@
             \node [block, below = 0.5cm of formula] (BCP) {BCP};
             \node [draw, ellipse, color=red, right = 5cm of BCP] (unsat) {UNSAT};
             \node [block, below = 0.5cm of BCP] (decide) {Decide};
-            \node [draw, ellipse, color=green, right = 3.5cm of decide] (sat) {SAT};
+            \node [draw, ellipse, color=blue, right = 3.5cm of decide] (sat) {SAT};
             \node [block, below = 1cm of decide] (BCP2) {BCP};
             \node [block, right = 2cm of BCP2] (resolve) {Resolve};
             \draw[->] (formula) -- (BCP);
@@ -317,10 +347,31 @@
 
 
     \begin{frame}
-        \frametitle{SAT Checking of Difference Logic}
+        \frametitle{SAT Checking}
         \begin{figure}[htb]
             \resizebox {0.55\linewidth} {!} {
-                \input{pictures/fig-lazy-approach.tex}
+                \begin{tikzpicture}
+                \tikzstyle{block} = [draw, rectangle]
+                
+                \node [draw, ellipse] (dl) {$ \phi $ in DL};
+                \node [block, below = 0.85cm of dl] (pl) {$ \phi' $ in PL};
+                \node [block, below = 0.5cm of pl] (sat-solver) {SAT Solver};
+                \node [block, below left = 1cm and 0.5cm of sat-solver] (model) {Model};
+                \node [block, below right = 1cm and -1cm of sat-solver] (explanation) {Explanation};
+                \node [block, below = 3cm of sat-solver, text width=4cm, align=center] (theory-solver) {DL Constrains Checker (Theory Solver)};
+                \node [draw, circle, color=blue, inner sep=0pt, text width=1cm, align=center, below left = 1cm and -0.5cm of theory-solver] (sat) {$ \phi $ is SAT};
+                \node [draw, circle, color=red, inner sep=0pt, text width=1.5cm, align=center, below right = 1cm and -0.1cm of theory-solver] (unsat) {$ \phi $ is UNSAT};
+                
+                \draw [->] (dl) -- node[anchor=east, name=substitution] {$ x - y \prec c \eqbydef p_{xyc} $} (pl);
+                \draw [->] (pl) -- (sat-solver);
+                \draw [->] (substitution) edge[bend right=70] node[anchor=south, sloped] {mapping} (theory-solver);
+                \draw [-] (sat-solver.west) edge[bend right=50] node[anchor=south east] {SAT} (model);
+                \draw [->] (model) edge[bend right=20] (theory-solver);
+                \draw [->] (sat-solver) -| node[anchor=south east] {UNSAT} (unsat);
+                \draw [-] (theory-solver) edge[bend right=30] node[anchor=south east] {UNSAT} (explanation);
+                \draw [->] (explanation) edge[bend right=20] (sat-solver);
+                \draw [->] (theory-solver) |- node[anchor=south east] {SAT} (sat);
+                \end{tikzpicture}
             }
             \caption{Lazy approach}
         \end{figure}
@@ -329,10 +380,29 @@
 
 
     \begin{frame}
-        \frametitle{SAT Checking of Difference Logic}
+        \frametitle{SAT Checking}
         \begin{figure}[htb]
-            \resizebox {0.9\linewidth} {!} {
-                \input{pictures/fig-incremental-approach.tex}
+            \resizebox {0.55\linewidth} {!} {
+                \begin{tikzpicture}
+                \tikzstyle{block} = [draw, rectangle]
+                
+                \node [draw, ellipse] (dl) {$ \phi $ in DL};
+                \node [block, below = 0.85cm of dl] (pl) {$ \phi' $ in PL};
+                \node [block, below = 0.5cm of pl] (sat-solver) {SAT Solver};
+                \node [block, below left = 1cm and 0.5cm of sat-solver, text width=1.5cm, align=center] (model) {\textcolor{blue}{Partial} Solution};
+                \node [block, below right = 1cm and -1cm of sat-solver, text width=2cm, align=center] (explanation) {SAT \textcolor{blue}{or} UNSAT + Explanation};
+                \node [block, below = 3cm of sat-solver, text width=4cm, align=center] (theory-solver) {DL Constrains Checker (Theory Solver)};
+                \node [draw, circle, inner sep=0pt, text width=1.5cm, align=center, below right = 1cm and -0.1cm of theory-solver] (unsat) {$ \phi $ is \textcolor{blue}{SAT} or \textcolor{red}{UNSAT}};
+                
+                \draw [->] (dl) -- node[anchor=east, name=substitution] {$ x - y \prec c \eqbydef p_{xyc} $} (pl);
+                \draw [->] (pl) -- (sat-solver);
+                \draw [->] (substitution) edge[bend right=70] node[anchor=south, sloped] {mapping} (theory-solver);
+                \draw [-] (sat-solver.west) edge[bend right=50] node[anchor=south east] {SAT} (model);
+                \draw [->] (model) edge[bend right=20] (theory-solver);
+                \draw [->] (sat-solver) -| (unsat);
+                \draw [-] (theory-solver) edge[bend right=30] (explanation);
+                \draw [->] (explanation) edge[bend right=20] (sat-solver);
+                \end{tikzpicture}
             }
             \caption{Incremental approach}
         \end{figure}
@@ -341,12 +411,26 @@
 
 
     \begin{frame}
-        \frametitle{Constraint Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{columns}[T]
             \begin{column}{.4\textwidth}
                 \begin{figure}[htb]
-                    \resizebox {\linewidth} {!} {
-                        \input{pictures/fig-example-cg-1.tex}
+                    \resizebox {1.2\linewidth} {!} {
+                        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+                        \node[state] (u) at (0, 2) {$u$};
+                        \node[state] (v) at (3, 2) {$v$};
+                        \node[state] (w) at (6, 2) {$w$};
+                        \node[state] (x) at (6, 0) {$x$};
+                        \node[state] (y) at (3, 0) {$y$};
+                        \node[state] (z) at (0, 0) {$z$};
+                        \draw [->] (u) -- node[anchor=south] {1} (v);
+                        \draw [->] (v) -- node[anchor=south] {5} (w);
+                        \draw [->] (w) -- node[anchor=east] {-3} (x);
+                        \draw [->] (x) -- node[anchor=north] {1} (y);
+                        \draw [->] (y) -- node[anchor=north] {-5} (z);
+                        \draw [->] (y) -- node[anchor=east] {0} (v);
+                        \end{tikzpicture}
+                        
                     }
                 \end{figure}
                 \begin{equation*}
@@ -362,70 +446,41 @@
             \end{column}
             \begin{column}{.4\textwidth}
                 \begin{figure}[htb]
-                    \resizebox {1.33\linewidth} {!} {
-                        \input{pictures/fig-example-cg-2.tex}
+                    \resizebox {1.2\linewidth} {!} {
+                        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+                        \node[state] (u) at (0, 2) {$u$};
+                        \node[state] (v) at (3, 2) {$v$};
+                        \node[state] (w) at (6, 2) {$\textcolor{red}{w}$};
+                        \node[state] (x) at (6, 0) {$\textcolor{red}{x}$};
+                        \node[state] (y) at (3, 0) {$\textcolor{red}{y}$};
+                        \node[state] (z) at (0, 0) {$z$};
+                        \draw [->] (u) -- node[anchor=south] {1} (v);
+                        \draw [->] (v) -- node[anchor=south] {5} (w);
+                        \draw [->] (w) -- node[anchor=west] {\textcolor{red}{-3}} (x);
+                        \draw [->] (x) -- node[anchor=north] {\textcolor{red}{-3}} (y);
+                        \draw [->] (y) -- node[anchor=north] {-5} (z);
+                        \draw [->] (y) -- node[anchor=east] {\textcolor{red}{4}} (w);
+                        \end{tikzpicture}
                     }
                 \end{figure}
                 \begin{equation*}
                     \begin{aligned}
                     \phi_3 &= (u-v < 1) \\
                     & \land (v-w < 5) \\
-                    & \land (w-x \leq -3) \\
-                    & \land (x-y < -3) \\
+                    & \land (\textcolor{red}{w-x \leq -3}) \\
+                    & \land (\textcolor{red}{x-y < -3}) \\
                     & \land (y-z \leq -5) \\
-                    & \land (y-w < 4) \\
+                    & \land (\textcolor{red}{y-w < 4}) \\
                     \end{aligned}
                 \end{equation*}
             \end{column}
         \end{columns}
-        \begin{equation*}
-            \Gamma = (V, E, weight, op)
-        \end{equation*}
     \end{frame}
-    
 
-    
+
+
     \begin{frame}
-        \frametitle{Negative Cycles in a Constraint Graph}
-        \begin{columns}[T]
-            \begin{column}{.4\textwidth}
-                Negative cycle
-                $ x \rightarrow y \rightarrow w \rightarrow x $
-                \begin{equation*}
-                    \begin{aligned}
-                    x - y & < -3 \\
-                    y - w & < \;\;\; 4 \\
-                    w - x & \leq -3 \\
-                    \hline
-                    \textcolor{red}{0} \; & \textcolor{red}{< -2}
-                    \end{aligned}
-                    \end{equation*}
-                    \textcolor{red}{A conflict!}
-            \end{column}
-            \begin{column}{.4\textwidth}
-                \begin{figure}[htb]
-                    \resizebox {1.33\linewidth} {!} {
-                        \input{pictures/fig-example-cg-2.tex}
-                    }
-                \end{figure}
-                \begin{equation*}
-                \begin{aligned}
-                \phi_3 &= (u-v < 1) \\
-                & \land (v-w < 5) \\
-                & \land (w-x \leq -3) \\
-                & \land (x-y < -3) \\
-                & \land (y-z \leq -5) \\
-                & \land (y-w < 4) \\
-                \end{aligned}
-                \end{equation*}
-            \end{column}
-        \end{columns}
-    \end{frame}
-    
-    
-    
-    \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{itemize}
             \item First idea: enumerate all cycles
             \begin{itemize}
@@ -442,7 +497,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{figure}[htb]
             \begin{tikzpicture}
             \node [draw, circle] (x1) {$ x_1 $};
@@ -502,7 +557,7 @@
         \begin{itemize}
             \item \textcolor{blue}{Problem:} a graph can have
             an enormous number of cycles
-            \item \Eg extreme case: fully connected
+            \item \Eg extreme case: \textcolor{blue}{fully connected}
             \textit{directed} graph with $ n $ vertices
             \begin{itemize}
                 \item Number of \textit{simple} cycles =
@@ -517,7 +572,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{itemize}
             \item Use Bellman-Ford algorithm for this
             task~\textcolor{blue}{[Cormen \etal 2009]}
@@ -552,7 +607,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{itemize}
             \item \textcolor{blue}{[Cotton \etal 2004]}
             uses the \textcolor{blue}{admissible graph}
@@ -588,7 +643,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{columns}[T]
             \begin{column}{.48\textwidth}
                 \begin{figure}[htb]
@@ -649,7 +704,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{columns}[T]
             \begin{column}{.48\textwidth}
                 \begin{figure}[htb]
@@ -712,7 +767,7 @@
 
 
     \begin{frame}
-        \frametitle{How to Find a Negative Cycle in a Graph}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{theorem}
             \label{the:neg-cycle-in-cg}
             Given a constraint graph $ \Gamma $ and a series of distance estimating
@@ -748,7 +803,7 @@
 
 
     \begin{frame}
-        \frametitle{Goldberg-Radzik Heuristic}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{itemize}
             \item \textcolor{blue}{[Goldberg+Radzik 1993]} suggests
             a heuristic to speed up Bellman-Ford algorithm
@@ -784,7 +839,7 @@
 
 
     \begin{frame}
-        \frametitle{SAT Checking Algorithm for Difference Logic (Sketch)}
+        \frametitle{Constraint Graph And Negative Cycles}
         \begin{figure}[htb]
             \begin{tikzpicture}
             \tikzstyle{block} = [draw, rectangle]
@@ -795,7 +850,7 @@
             \node [block, right = of checkCycle, text width=2cm, align=center] (hasCycle) {Does the cycle correspond to a conflict?};
             \node [draw, ellipse, color=red, above = 0.5cm of hasCycle] (unsat) {UNSAT};
             \node [block, below = 0.5cm of hasCycle, text width=3cm, align=center] (admissibleEdges) {Are there admissible unscanned edges?};
-            \node [draw, ellipse, color=green, below = 0.5cm of admissibleEdges] (sat) {SAT};
+            \node [draw, ellipse, color=blue, below = 0.5cm of admissibleEdges] (sat) {SAT};
             \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply Goldberg-Radzik pass $ \Rightarrow $ update distances and statuses};
 
             \draw[->] (formula) -- (cg);
