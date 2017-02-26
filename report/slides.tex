@@ -87,11 +87,6 @@
             In Formal Techniques, Modelling and Analysis
             of Timed and Fault-Tolerant Systems,
             pages 263--276. Springer, 2004.
-            \item \textcolor{blue}{[Goldberg+Radzik 1993]}
-            Andrew V. Goldberg and Tomasz Radzik.
-            \textbf{``A heuristic improvement of
-                the Bellman-Ford algorithm``}.
-            Applied Mathematics Letters, 6(3):3–6, 1993.
             \item \textcolor{blue}{[Cormen \etal 2009]}
             Thomas H. Cormen, Charles E. Leiserson,
             Ronald L. Rivest and Clifford Stein.
@@ -117,8 +112,8 @@
             \end{equation*}
             $ x,y $ -- variables, $ c $ -- constant
             and $ \prec \in \{ <, \le \} $ -- comparison operator.
-            \item $ x,y,c $ can be Integers $ \mathbb{Z} $
-            or Reals $ \mathbb{R} $.
+            \item $ x,y,c $ -- $ \mathbb{Z} $
+            or $ \mathbb{R} $.
         \end{itemize}
     \end{frame}
 
@@ -161,7 +156,7 @@
 
 
     \begin{frame}
-        \frametitle{Difference Logic. Special cases}
+        \frametitle{Difference Logic}
         \begin{itemize}
             \item $ x < c \;\; \Leftrightarrow \;\; x - 0 < c \;\; \Leftrightarrow \;\; x - zero < c $
             \\
@@ -170,10 +165,7 @@
             \item $ x \ge c \;\; \Leftrightarrow \;\; -x \le -c \;\; \Leftrightarrow \;\; 0 - x \le -c \;\; \Leftrightarrow \;\; zero - x \le -c $
             \pause
             \item $ x \neq c \;\; \Leftrightarrow \;\; ((x < c) \lor (x > c)) $
-            and then see above
-            \pause
             \item $ x = c \;\; \Leftrightarrow \;\; \neg ((x < c) \lor (x > c)) $
-            and then see above
             \pause
             \item An example:
             \begin{equation*}
@@ -435,14 +427,17 @@
                 \end{figure}
                 \begin{equation*}
                     \begin{aligned}
-                    \phi_2 &= (u-v < 1) \\
-                    & \land (v-w < 5) \\
-                    & \land (w-x \leq -3) \\
-                    & \land (x-y < 1) \\
-                    & \land (y-z \leq -5) \\
-                    & \land (y-v \leq 0) \\
+                    & (u-v < 1) \\
+                    \land \; & (v-w < 5) \\
+                    \land \; & (w-x \leq -3) \\
+                    \land \; & (x-y < 1) \\
+                    \land \; & (y-z \leq -5) \\
+                    \land \; & (y-v \leq 0) \\
                     \end{aligned}
                 \end{equation*}
+                \begin{center}
+                    \textcolor{blue}{SAT}
+                \end{center}
             \end{column}
             \begin{column}{.4\textwidth}
                 \begin{figure}[htb]
@@ -465,14 +460,17 @@
                 \end{figure}
                 \begin{equation*}
                     \begin{aligned}
-                    \phi_3 &= (u-v < 1) \\
-                    & \land (v-w < 5) \\
-                    & \land (\textcolor{red}{w-x \leq -3}) \\
-                    & \land (\textcolor{red}{x-y < -3}) \\
-                    & \land (y-z \leq -5) \\
-                    & \land (\textcolor{red}{y-w < 4}) \\
+                    & (u-v < 1) \\
+                    \land \; & (v-w < 5) \\
+                    \land \; & (\textcolor{red}{w-x \leq -3}) \\
+                    \land \; & (\textcolor{red}{x-y < -3}) \\
+                    \land \; & (y-z \leq -5) \\
+                    \land \; & (\textcolor{red}{y-w < 4}) \\
                     \end{aligned}
                 \end{equation*}
+                \begin{center}
+                    \textcolor{red}{UNSAT : $ 0 < -2 $}
+                \end{center}
             \end{column}
         \end{columns}
     \end{frame}
@@ -485,10 +483,11 @@
             \item First idea: enumerate all cycles
             \begin{itemize}
                 \item and check if they are negative \\
-                ($ 0 \prec c $ conflict clause where $ c < 0$
-                and $ \prec \in \{ <, \le \} $)
+                \ie correspond to conflicts
+                like \eg \textcolor{blue}{$ 0 < -1 $},
+                \textcolor{blue}{$ 0 \le -5 $} \etc
                 \item or they have zero weight and an edge with a strict inequality \\
-                ($ 0 < 0 $ conflict clause)
+                \ie correspond to \textcolor{blue}{$ 0 < 0 $} conflict.
             \end{itemize}
             \item \textcolor{blue}{Any problems with this approach?}
         \end{itemize}
@@ -560,7 +559,7 @@
             \item \Eg extreme case: \textcolor{blue}{fully connected}
             \textit{directed} graph with $ n $ vertices
             \begin{itemize}
-                \item Number of \textit{simple} cycles =
+                \item Number of \textcolor{blue}{simple} cycles =
                 $ \sum_{i=2}^{n} \binom{i}{n}
                 \cdot (i-1)! $
                 \item Factorial grows even faster than exponent
@@ -578,14 +577,19 @@
             task~\textcolor{blue}{[Cormen \etal 2009]}
             \begin{itemize}
                 \item $ O(|V| \cdot |E|) $ time complexity
+                \item $ s \in V $ -- source vertex
+                (can be selected \eg randomly)
+                \item $ \Gamma = (V,E,weight) $ -- directed graph
+                \item $ d \in V \mapsto \mathbb{R} $ -- distance estimate function
+                \item Note: the algorithm runs once for the whole graph,
+                not once for each vertex (\ie $ |V| $ times).
             \end{itemize}
         \end{itemize}
-        \begin{algorithm}{Bellman-Ford}
-            {\text{graph} \Gamma = (V,E,weight), \text{source vertex} s \in V}
-            \begin{FOR}{\mathrm{each \; vertex} \; x \in V}
-                d(x) = \infty
-            \end{FOR} \\
-            d(s) = 0 \\
+        \begin{algorithm}{Bellman-Ford} { \Gamma, s }
+            \mathrm{set} \;\;\; d(x) = \infty \;\;\; \forall x \in V \\
+            d(s) = 0
+            \pause
+            \\
             \begin{FOR}{i = 1 \; \mathrm{to} \; |V|-1}
                 \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
                     \begin{IF}{\textcolor{blue}{d(x) + weight(x,y) < d(y)}}
@@ -594,12 +598,16 @@
                         }
                     \end{IF}
                 \end{FOR}
-            \end{FOR} \\
+            \end{FOR}
+            \pause
+            \\
             \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
                 \begin{IF}{d(x) + weight(x,y) < d(y)}
                     \RETURN False
                 \end{IF}
-            \end{FOR} \\
+            \end{FOR}
+            \pause
+            \\
             \RETURN True
         \end{algorithm}
     \end{frame}
@@ -619,7 +627,7 @@
                 \item Reduced cost function
                 $ r(x,y) = weight(x,y) + d(x) - d(y) $
                 \item Admissible edge:
-                $ r_d(x,y) \; \textcolor{blue}{\leq} \; 0 $
+                $ r(x,y) \; \textcolor{blue}{\leq} \; 0 $
                 \item Admissible graph $ \Gamma_d $ -- a graph
                 consisting of admissible edges
             \end{itemize}
@@ -627,15 +635,17 @@
             \begin{itemize}
                 \item $ \Gamma_d $ is \textcolor{blue}{dynamic}
                 because it depends
-                on $ d $ which changes during
-                the execution of the algorithm
+                on $ d $ which
+                \textcolor{blue}{changes during
+                the execution of the algorithm}
                 \item If $ r(x,y) < 0 $ then the edge $ (x,y) $
                 can be "relaxed" \ie used to improve $ d(y) $
                 \item $ \Gamma_d $ consists of
                 edges which might potentially be used to improve $ d $
-                \item Intuition: if $ \Gamma_d $ has a cycle then
-                this cycle might be used to update $ d $
-                infinitely
+                \item Intuition: if $ \Gamma_d $ has a
+                \textcolor{blue}{cycle} then
+                this cycle might be used to
+                \textcolor{blue}{update $ d $ infinitely}
             \end{itemize}
         \end{itemize}
     \end{frame}
@@ -770,70 +780,20 @@
         \frametitle{Constraint Graph And Negative Cycles}
         \begin{theorem}
             \label{the:neg-cycle-in-cg}
-            Given a constraint graph $ \Gamma $ and a series of distance estimating
-            functions $ (d_0, d_1, d_2, d_3, \dots) $, $ \Gamma $ has a negative
-            or zero cycle if and only if $ \Gamma_d $ has a cycle under some
-            distance estimate $ d_k $.
+            Given a constraint graph $ \Gamma $ \\
+            and \\
+            a series of distance estimating \\
+            functions $ (d_0, d_1, d_2, d_3, \dots) $, \\
+            $ \Gamma $ has a negative or zero cycle \\
+            if and only if \\
+            \textcolor{blue}{
+                $ \Gamma_d $ has a cycle under some
+                distance estimate $ d_k $.
+            }
             \begin{proof}
-                Use ``proof-by-contradiction`` approach.
-                \\
-                $ \Rightarrow $ Use the following fact inferred
-                from~\textcolor{blue}{[Cormen \etal 2009]}.
-                When $ \Gamma $ has
-                a negative cycle then the series
-                $ (d_0, d_1, d_2, d_3, \dots) $
-                will \textcolor{blue}{never converge}.
-                \\
-                $ \Leftarrow $ Cycle is in $ \Gamma_d $
-                therefore all its edges are
-                \textcolor{blue}{admissible}
-                and therefore
-                $ d(x_i) + weight(x_i, x_{i+1}) \le d(x_{i+1}) $.
-                Sum the latter inequality along all the edges of the
-                cycle and show that the cycle's weight will be
-                non-positive:
-                $ \sum_{i=0}^{n-1} weight(x_i, x_{i+1}) \le 0 $
-                \\
-                For the full proof please see my seminar paper
-                or~\textcolor{blue}{[Cotton~\etal~2004]}.
+                see~\textcolor{blue}{[Cotton~\etal~2004]}.
             \end{proof}
         \end{theorem}
-    \end{frame}
-
-
-
-    \begin{frame}
-        \frametitle{Constraint Graph And Negative Cycles}
-        \begin{itemize}
-            \item \textcolor{blue}{[Goldberg+Radzik 1993]} suggests
-            a heuristic to speed up Bellman-Ford algorithm
-            in \textcolor{blue}{practical cases}.
-            \item The theoretical upper bound stays the same:
-            $ O(|V| \cdot |E|) $
-            \item Idea:
-            \begin{itemize}
-                \item Mark vertices as ``unreached``, ``labeled``
-                and ``scanned`` (vertex status)
-                \item In the beginning of each \textcolor{blue}{pass}
-                take vertices that have at least one outgoing admissible
-                edge -- set $ B $
-                \item Also, mark those vertices that have no outgoing
-                admissible edges as ``scanned``
-                \item Calculate set $ A $ -- unexplored vertices
-                (\ie ``unreached``) which are reachable from $ B $
-                in \textcolor{blue}{$ \Gamma_d $}
-                \item \textcolor{blue}{Sort $ A $ topologically using
-                $ \Gamma_d $
-                as the input graph}
-                \item Execute a \textcolor{blue}{pass}:
-                \begin{itemize}
-                    \item For each vertex in $ A $ relax all
-                    outgoing admissible edges (of course, if they
-                    can be relaxed \ie if $ r(x,y) < 0 $)
-                \end{itemize}
-                \item Execute passes until all the vertices are scanned
-            \end{itemize}
-        \end{itemize}
     \end{frame}
 
 
@@ -845,13 +805,13 @@
             \tikzstyle{block} = [draw, rectangle]
             \node [block] (formula) {$ \phi $};
             \node [block, right = 0.5cm of formula, text width=2cm, align=center] (cg) {Constraint Graph $ \Gamma $};
-            \node [block, right = 0.5cm of cg, text width=2cm, align=center] (init1) {Initialize distances, statuses \etc};
+            \node [block, right = 0.5cm of cg, text width=2cm, align=center] (init1) {Initialize distance estimates};
             \node [block, below = 0.5cm of init1, text width=2cm, align=center] (checkCycle) {Does $ \Gamma_d $ has a cycle?};
             \node [block, right = of checkCycle, text width=2cm, align=center] (hasCycle) {Does the cycle correspond to a conflict?};
             \node [draw, ellipse, color=red, above = 0.5cm of hasCycle] (unsat) {UNSAT};
-            \node [block, below = 0.5cm of hasCycle, text width=3cm, align=center] (admissibleEdges) {Are there admissible unscanned edges?};
+            \node [block, below = 0.5cm of hasCycle, text width=3cm, align=center] (admissibleEdges) {Have $ |V| $ passes been done?};
             \node [draw, ellipse, color=blue, below = 0.5cm of admissibleEdges] (sat) {SAT};
-            \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply Goldberg-Radzik pass $ \Rightarrow $ update distances and statuses};
+            \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply the next pass $ \Rightarrow $ update distance estimates and rebuild $ \Gamma_d $};
 
             \draw[->] (formula) -- (cg);
             \draw[->] (cg) -- (init1);
@@ -860,8 +820,8 @@
             \draw[->] (checkCycle) -- node[anchor=south] {no} (admissibleEdges);
             \draw[->] (hasCycle) -- node[anchor=west] {yes} (unsat);
             \draw[->] (hasCycle) -- node[anchor=west] {no} (admissibleEdges);
-            \draw [->] (admissibleEdges) -- node[anchor=west] {no} (sat);
-            \draw [->] (admissibleEdges) -- node[anchor=south] {yes} (applyGR);
+            \draw [->] (admissibleEdges) -- node[anchor=west] {yes} (sat);
+            \draw [->] (admissibleEdges) -- node[anchor=south] {no} (applyGR);
             \draw [->] (applyGR) -- (checkCycle);
             \end{tikzpicture}
         \end{figure}
@@ -882,7 +842,8 @@
                 \item A negative cycle corresponds to a conflict
                 $ 0 \prec c $ where $ c < 0 $
                 and $ \prec \in \{ <, \le \} $.
-                \item A zero weight cycle with a strict inequality
+                \item A zero weight cycle with a
+                \textcolor{blue}{strict inequality}
                 edge corresponds to a conflict
                 $ 0 < 0 $.
             \end{itemize}
@@ -953,5 +914,168 @@
             \end{itemize}
             \end{column}
         \end{columns}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Backup Slide. Multiple runs of Bellman-Ford}
+    \begin{figure}[htb]
+        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+        \tikzstyle{vertex} = [draw, circle, minimum size=0.85cm]
+        \node[vertex] (p) {$p$};
+        \node[vertex, below left = 1cm and 0.5cm of p] (r) {$r$};
+        \node[vertex, left = 1cm of r] (q) {$q$};
+        \node[vertex, below right = 1cm and 0.5cm of p, color=blue] (s) {$s$};
+        \node[vertex, below right = 1cm and 0.5cm of q] (t) {$t$};
+        \node[vertex, below left = 1cm and 0.5cm of s] (u) {$u$};
+        \node[vertex, below right = 1cm and 0.5cm of s] (v) {$v$};
+
+        \draw [->] (p) -- (r);
+        \draw [->] (p) -- (s);
+        \draw [->] (r) -- (q);
+        \draw [->] (q) -- (t);
+        \draw [->] (t) -- (r);
+        \draw [->] (s) -- (u);
+        \draw [->] (s) -- (v);
+        \draw [->] (r) -- (s);
+        \end{tikzpicture}
+    \end{figure}
+    \vfill
+    \begin{center}
+        In this example each edge has weight \textcolor{blue}{-1}. \\
+        Suppose that \textcolor{blue}{$ s $}
+        is selected as the source vertex.
+    \end{center}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Backup Slide. Multiple runs of Bellman-Ford}
+    \begin{figure}[htb]
+        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+        \tikzstyle{vertex} = [draw, circle, minimum size=0.85cm]
+        \node[vertex] (p) {$p$};
+        \node[vertex, below left = 1cm and 0.5cm of p] (r) {$r$};
+        \node[vertex, left = 1cm of r] (q) {$q$};
+        \node[vertex, below right = 1cm and 0.5cm of p, color=blue] (s) {$s$};
+        \node[vertex, below right = 1cm and 0.5cm of q] (t) {$t$};
+        \node[vertex, below left = 1cm and 0.5cm of s, color=blue] (u) {$u$};
+        \node[vertex, below right = 1cm and 0.5cm of s, color=blue] (v) {$v$};
+        
+        \draw [->] (p) -- (r);
+        \draw [->] (p) -- (s);
+        \draw [->] (r) -- (q);
+        \draw [->] (q) -- (t);
+        \draw [->] (t) -- (r);
+        \draw [->, color=blue] (s) -- (u);
+        \draw [->, color=blue] (s) -- (v);
+        \draw [->] (r) -- (s);
+        \end{tikzpicture}
+    \end{figure}
+    \vfill
+    \begin{center}
+        Bellman-Ford processes only a subgraph. \\
+        No cycles have been detected.
+    \end{center}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Backup Slide. Multiple runs of Bellman-Ford}
+    \begin{figure}[htb]
+        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+        \tikzstyle{vertex} = [draw, circle, minimum size=0.85cm]
+        \node[vertex] (p) {$p$};
+        \node[vertex, below left = 1cm and 0.5cm of p] (r) {$r$};
+        \node[vertex, left = 1cm of r] (q) {$q$};
+        \node[vertex, below right = 1cm and 0.5cm of p] (s) {$s$};
+        \node[vertex, below right = 1cm and 0.5cm of q] (t) {$t$};
+        \node[vertex, below left = 1cm and 0.5cm of s] (u) {$u$};
+        \node[vertex, below right = 1cm and 0.5cm of s] (v) {$v$};
+        
+        \draw [->] (p) -- (r);
+        \draw [->] (p) -- (s);
+        \draw [->] (r) -- (q);
+        \draw [->] (q) -- (t);
+        \draw [->] (t) -- (r);
+        \draw [->] (r) -- (s);
+        \end{tikzpicture}
+    \end{figure}
+    \vfill
+    \begin{center}
+        Discard the edges that have been processed \\
+        because \textcolor{blue}{we do not need to process them twice}. \\
+        Select the next source vertex and run Bellman-Ford again.
+    \end{center}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Backup Slide. Multiple runs of Bellman-Ford}
+    \begin{figure}[htb]
+        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+        \tikzstyle{vertex} = [draw, circle, minimum size=0.85cm]
+        \node[vertex] (p) {$p$};
+        \node[vertex, below left = 1cm and 0.5cm of p] (r) {$r$};
+        \node[vertex, left = 1cm of r] (q) {$q$};
+        \node[vertex, below right = 1cm and 0.5cm of p] (s) {$s$};
+        \node[vertex, below right = 1cm and 0.5cm of q, color=blue] (t) {$t$};
+        \node[vertex, below left = 1cm and 0.5cm of s] (u) {$u$};
+        \node[vertex, below right = 1cm and 0.5cm of s] (v) {$v$};
+        
+        \draw [->] (p) -- (r);
+        \draw [->] (p) -- (s);
+        \draw [->] (r) -- (q);
+        \draw [->] (q) -- (t);
+        \draw [->] (t) -- (r);
+        \draw [->] (r) -- (s);
+        \end{tikzpicture}
+    \end{figure}
+    \vfill
+    \begin{center}
+        Suppose, the next source vertex is \textcolor{blue}{$ t $}.
+    \end{center}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Backup Slide. Multiple runs of Bellman-Ford}
+    \begin{figure}[htb]
+        \begin{tikzpicture}[scale=0.9,state/.style={draw, circle, fill=none,text centered, text=black}]
+        \tikzstyle{vertex} = [draw, circle, minimum size=0.85cm]
+        \node[vertex] (p) {$p$};
+        \node[vertex, below left = 1cm and 0.5cm of p, color=blue] (r) {$r$};
+        \node[vertex, left = 1cm of r, color=blue] (q) {$q$};
+        \node[vertex, below right = 1cm and 0.5cm of p] (s) {$s$};
+        \node[vertex, below right = 1cm and 0.5cm of q, color=blue] (t) {$t$};
+        \node[vertex, below left = 1cm and 0.5cm of s] (u) {$u$};
+        \node[vertex, below right = 1cm and 0.5cm of s] (v) {$v$};
+        
+        \draw [->] (p) -- (r);
+        \draw [->] (p) -- (s);
+        \draw [->, color=blue] (r) -- (q);
+        \draw [->, color=blue] (q) -- (t);
+        \draw [->, color=blue] (t) -- (r);
+        \draw [->, color=blue] (r) -- (s);
+        \end{tikzpicture}
+    \end{figure}
+    \vfill
+    \begin{center}
+        Bellman-Ford finds the negative cycle
+        \textcolor{blue}{$ t \rightarrow r \rightarrow q \rightarrow t $}. \\
+        Since \textcolor{blue}{the processed edges have been discarded}, \\
+        we do not process the edges
+        \textcolor{blue}{$ (s;u) $} and \textcolor{blue}{$ (s;v) $}
+        again, \\
+        and therefore the complexity for the whole graph stays \\
+        \textcolor{blue}{$ O(|V| \cdot |E|) $} \\
+        \ie multiple runs of Bellman-Ford
+        \textcolor{blue}{do not increase it}.
+    \end{center}
     \end{frame}
 \end{document}
