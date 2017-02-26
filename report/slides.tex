@@ -603,12 +603,17 @@
             \\
             \begin{FOR}{\mathrm{each \; edge} \; (x,y) \in E}
                 \begin{IF}{d(x) + weight(x,y) < d(y)}
-                    \RETURN False
+                    \RETURN False \; (
+                    \textcolor{blue}{\Rightarrow \mathrm{negative\;cycle\;detected}}
+                    )
                 \end{IF}
             \end{FOR}
             \pause
             \\
             \RETURN True
+            \; (
+            \textcolor{blue}{\Rightarrow \mathrm{no\;negative\;cycles}}
+            )
         \end{algorithm}
     \end{frame}
 
@@ -648,6 +653,35 @@
                 \textcolor{blue}{update $ d $ infinitely}
             \end{itemize}
         \end{itemize}
+    \end{frame}
+
+
+
+    \begin{frame}
+    \frametitle{Constraint Graph And Negative Cycles}
+    \begin{theorem}
+        \label{the:neg-cycle-in-cg}
+        Given a constraint graph $ \Gamma $ \\
+        and \\
+        a \textcolor{blue}{series} of distance estimating \\
+        functions $ (d_0, d_1, d_2, d_3, \dots) $, \\
+        $ \Gamma $ has a negative or zero cycle \\
+        if and only if \\
+        \textcolor{blue}{
+            $ \Gamma_d $ has a cycle under some
+            distance estimate $ d_k $.
+        }
+        \begin{proof}
+            see~\textcolor{blue}{[Cotton~\etal~2004]}.
+        \end{proof}
+    \end{theorem}
+    \begin{center}
+        Note: the series $ (d_0, d_1, d_2, d_3, \dots) $ \\
+        correspond to the updates of $ d $ during the run of Bellman-Ford \\
+        where $ d_0(s) = 0 $ and
+        $ d_0(x)=\infty \; \forall x \in V \; s.t. \; x \ne s $ \\
+        are the initial distance estimates.
+    \end{center}
     \end{frame}
 
 
@@ -778,28 +812,6 @@
 
     \begin{frame}
         \frametitle{Constraint Graph And Negative Cycles}
-        \begin{theorem}
-            \label{the:neg-cycle-in-cg}
-            Given a constraint graph $ \Gamma $ \\
-            and \\
-            a series of distance estimating \\
-            functions $ (d_0, d_1, d_2, d_3, \dots) $, \\
-            $ \Gamma $ has a negative or zero cycle \\
-            if and only if \\
-            \textcolor{blue}{
-                $ \Gamma_d $ has a cycle under some
-                distance estimate $ d_k $.
-            }
-            \begin{proof}
-                see~\textcolor{blue}{[Cotton~\etal~2004]}.
-            \end{proof}
-        \end{theorem}
-    \end{frame}
-
-
-
-    \begin{frame}
-        \frametitle{Constraint Graph And Negative Cycles}
         \begin{figure}[htb]
             \begin{tikzpicture}
             \tikzstyle{block} = [draw, rectangle]
@@ -811,7 +823,7 @@
             \node [draw, ellipse, color=red, above = 0.5cm of hasCycle] (unsat) {UNSAT};
             \node [block, below = 0.5cm of hasCycle, text width=3cm, align=center] (admissibleEdges) {Have $ |V| $ passes been done?};
             \node [draw, ellipse, color=blue, below = 0.5cm of admissibleEdges] (sat) {SAT};
-            \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply the next pass $ \Rightarrow $ update distance estimates and rebuild $ \Gamma_d $};
+            \node [block, left = 1cm of admissibleEdges, text width=5cm, align=center] (applyGR) {Apply the next pass $ \Rightarrow $ \textcolor{blue}{update} distance estimates and \textcolor{blue}{rebuild $ \Gamma_d $}};
 
             \draw[->] (formula) -- (cg);
             \draw[->] (cg) -- (init1);
@@ -840,16 +852,19 @@
             by a constraint graph $ \Gamma $.
             \begin{itemize}
                 \item A negative cycle corresponds to a conflict
-                $ 0 \prec c $ where $ c < 0 $
-                and $ \prec \in \{ <, \le \} $.
+                $ 0 \prec c $ \\
+                where \textcolor{blue}{$ c < 0 $}
+                and $ \prec \in \{ <, \le \} $
+                \eg \textcolor{blue}{$ 0 < -3 $},
+                \textcolor{blue}{$ 0 \le -1 $} \etc
                 \item A zero weight cycle with a
                 \textcolor{blue}{strict inequality}
                 edge corresponds to a conflict
-                $ 0 < 0 $.
+                \textcolor{blue}{$ 0 < 0 $}.
             \end{itemize}
-            \item There is no need to enumerate all cycles in $ \Gamma $.
+            \item There is no need to enumerate all cycles in $ \Gamma $. \\
             Bellman-Ford algorithm can be used to detect a negative
-            cycle in~$ O(|V| \cdot |E|) $ operations.
+            cycle in~\textcolor{blue}{$ O(|V| \cdot |E|) $} operations.
             \item A cycle in admissible graph $ \Gamma_d $
             corresponds to a negative or zero weight cycle in
             the corresponding constraint graph $ \Gamma $.
