@@ -13,7 +13,7 @@ In my presentation I'll go through the following:
 
 PDF page 3
 I've used primarily these two sources for my report.
-The first one is the paper which shows how difference logic can be transformed into a graph based problem.
+The first one is the paper which shows how SAT problem of difference logic can be transformed into a graph based problem.
 The second one is the chapter 24 from the "Introduction to Algorithms" which among other things describes the Bellman-Ford algorithm which forms the core of the graph-based approach to solve DL SAT problem which I'm going to describe further in the presentation.
 
 
@@ -104,7 +104,7 @@ How do we solve SAT of a DL formula then?
 
 PDF page 26
 The answer is: we combine SAT checker with a theory solver.
-SAT checker hanles the propositional part i.e. the boolean skeleton and theory solver handles theory constraints.
+SAT checker handles the propositional part i.e. the boolean skeleton and theory solver handles theory constraints.
 There are 2 approaches of combining SAT checker with theory solver: lazy and incremental.
 In the lectures lazy is called the full lazy approach and incremental is called the less lazy approach.
 On the slide the full lazy approach is presented when the theory solver always receives the full solution.
@@ -122,13 +122,13 @@ And "together" means the AND operator i.e. a conjunction of the constraints.
 
 PDF page 28
 As I've mentioned earlier, the SAT problem of a conjunction of DL constraints can be transformed into a graph problem.
-We need to build a special constraint graph for a given set of DL constraints and try find a negative cycle in it.
-If we do find a negative cycle then the given set of constraints are UNSAT and the constraints constituting the cycle form the explanation for the SAT checker.
-E.g. in the graph on the right, the red inequalities form the explanation because they imply the inequality "0 < -2".
+We need to build a special constraint graph for a given set of DL constraints and try to find a negative cycle in it.
 The constraint graph is fairly easy to construct.
 You map each variable to a vertex and each inequality to an edge between the two variables.
 The weights of edges equal to the corresponding constants.
 Note that the graph is directed!
+If we do find a negative cycle then the given set of constraints are UNSAT and the constraints constituting the cycle form the explanation for the SAT checker.
+E.g. in the graph on the right, the red inequalities form the explanation because they imply the inequality "0 < -2".
 
 
 
