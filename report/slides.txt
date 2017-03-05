@@ -13,8 +13,8 @@ In my presentation I'll go through the following:
 
 PDF page 3
 I've used primarily these two sources for my report.
-The first one is the paper which shows how difference logic can be transformed into a graph based problem which can be solved faster than the general simplex problem arising from the DL constraints.
-The second one is the chapter 24 from the "Introduction to Algorithms" which among other things describes the Bellman-Ford algorithm which forms the core of the already mentioned graph-based approach to solve DL SAT problem.
+The first one is the paper which shows how difference logic can be transformed into a graph based problem.
+The second one is the chapter 24 from the "Introduction to Algorithms" which among other things describes the Bellman-Ford algorithm which forms the core of the graph-based approach to solve DL SAT problem which I'm going to describe further in the presentation.
 
 
 
@@ -27,8 +27,8 @@ As we'll see later, such constraints ofter arise in timing-related problems.
 E.g. x can be finish time of event A and y can be start time of event B.
 Suppose time is measured in minutes.
 Then the constraint says that "B not be delayed more that c minutes from A".
-As DL is a subset of more general linear arithmetic logic, it can be also solved by general simplex.
-However, as I've already stated, you can solve it faster by applying the special graph-based algorithm, which I'll describe later in the presentation.
+As DL is a subset of more general linear arithmetic logic, it can be solved by general simplex.
+However, it can be solved faster by applying the special graph-based algorithm, which I'll describe later in the presentation.
 First I'm going to show you some examples of DL formulas.
 
 
@@ -49,7 +49,6 @@ Later I'll show you how one can detect such a cotradicting set of constraints us
 PDF page 11-12
 Although, DL constraint must always contain exactly 2 variables, nevertheless it is possible to express inequalities with only one variable in DL.
 How? By introducing a special pseudo-variable zero.
-As you'll see later, this special variable zero does not change the SAT checking algorithm applied to a DL formula.
 The inequalities of type "greater-than" and "greater-or-equal-than" can be also expressed in DL.
 As well as inequalities and equalities.
 Consider the following constraint as an example.
@@ -65,11 +64,11 @@ As you can see the constraints of the final formula have exactly two variables a
 PDF page 19
 One of the motivations behind the DL is the job scheduling problem.
 Suppose we have 2 machines and 4 jobs with known processing times tau (constants).
-We would like to schedule our 4 jobs on our 2 machines such that the overall processing time would not exceed T (constant).
+We would like to schedule these 4 jobs on the 2 machines such that the overall processing time would not exceed T (constant).
 The problem can be formulated in DL.
 Notation: variables are blue e.g. t1, t3 and constants are black e.g. tau1, T.
-p are the propositional variables which show which job has been scheduled on which machine.
-t are numeric variables which denote the start time of each job.
+p_mj is the propositional variables which shows that job j has been scheduled on machine m.
+t_i is numeric variables which denotes the start time of job i.
 2 rules are important for us: overlap rule and general time constants rule.
 the first one states that if jobs i and j are both scheduled on machine m then job i must finish before j starts of, vice verse, job j must finish before i starts i.e. time-overlap on the same machine is not allowed.
 and the second rule just describes general time constraints that each job must finish before T.
@@ -122,7 +121,7 @@ And "together" means the AND operator i.e. a conjunction of the constraints.
 
 
 PDF page 28
-As I've mentioned earlier, the SAT problem of a conjunction of DL constraints can be transformed to a graph problem.
+As I've mentioned earlier, the SAT problem of a conjunction of DL constraints can be transformed into a graph problem.
 We need to build a special constraint graph for a given set of DL constraints and try find a negative cycle in it.
 If we do find a negative cycle then the given set of constraints are UNSAT and the constraints constituting the cycle form the explanation for the SAT checker.
 E.g. in the graph on the right, the red inequalities form the explanation because they imply the inequality "0 < -2".
@@ -183,9 +182,42 @@ The intuition behind the theorem is that if Gamma_d has a cycle then this cycle 
 
 
 PDF page 37
+Let me show you why Gamma_d is dynamic.
+Consider the graph Gamma on the left.
+Suppose the distance estimates on the left at some iteration of Bellman-Ford algorithm.
+If you calculate the reduced cost functions you will get the following values.
+The definition of the admissible graph Gamma_d states that Gamma_d consists only of those edges for which the residual cost function is less than or equal to zero.
+Those edges are depicted on the right picture.
+Consider the relaxation operation applied to the edge (x3;x4).
+
+
+
 PDF page 38
+The relaxation operation updates the distance estimate for the vertex x4.
+Since d(x4) changes, the values of the reduced cost function also change.
+Newly calculated values are marked with blue.
+The updated blue values now correspond to admissible edges which should be added to Gamma_d.
+The newly added edges are depicted in blue color on the right.
+Note that this update introduces a cycle in Gamma_d.
+And this cycle corresponds to the negative cycle in Gamma.
+
+
+
 PDF page 39
+This diagram shows the logic of the Theory Solver:
+  first, the constraint graph is constructed
+  then, distance estimates are initialized (to infinity, and zero for the source vertex)
+  then, Bellman-Ford algorithm starts to update the distance estimates
+  on each distance estimate, Gamma_d is checked for cycles
+  if it has a cycle then it might correspond to a conflict
+  if Gamma_d has no cycles then we procees with Bellman-Ford algorithm until |V| passes has been applied
+
+
+
 PDF page 40
+In conclusion, difference logic can describe many time-related problems.
+Although, general simplex can be used to check SAT of a DL formula, there is a faster algorithm for this task.
+The algorithm is based on Bellman-Ford algorithm and cycle detection in the admissible graph Gamma_d.
 
 
 
