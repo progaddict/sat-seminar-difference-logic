@@ -1,0 +1,194 @@
+PDF page 2
+Hello, everyone!
+My name is Alex and I'm going to present difference logic.
+In my presentation I'll go through the following:
+  main sources that I've used
+  definition of difference logic and some examples of DL formulas
+  the job scheduling problem which serves as an example of motivation behind the difference logic
+  general SAT checking in a nutshell
+  how SAT checking of a DL formula can be transformed into a graph problem
+  and conclusion in the end
+
+
+
+PDF page 3
+I've used primarily these two sources for my report.
+The first one is the paper which shows how difference logic can be transformed into a graph based problem which can be solved faster than the general simplex problem arising from the DL constraints.
+The second one is the chapter 24 from the "Introduction to Algorithms" which among other things describes the Bellman-Ford algorithm which forms the core of the already mentioned graph-based approach to solve DL SAT problem.
+
+
+
+PDF page 4
+So what's DL?
+Difference logic is a special case of linear arithmetic logic, in which constraints have the following form.
+A DL constraint states that the difference between 2 variables should not exceed the limit c.
+Important note: a constraint has exactly 2 variables without any coefficients in front of them.
+As we'll see later, such constraints ofter arise in timing-related problems.
+E.g. x can be finish time of event A and y can be start time of event B.
+Suppose time is measured in minutes.
+Then the constraint says that "B not be delayed more that c minutes from A".
+As DL is a subset of more general linear arithmetic logic, it can be also solved by general simplex.
+However, as I've already stated, you can solve it faster by applying the special graph-based algorithm, which I'll describe later in the presentation.
+First I'm going to show you some examples of DL formulas.
+
+
+
+PDF page 5-10
+phi_1 is an example of a DL formula where both numeric and propositional variables are used.
+This formula is SAT and this is one of the solutions.
+phi_2 is an example of a DL formula where only numeric variables are used.
+It is also SAT.
+One of the solutions is given below the formula.
+phi_3 is another example of pure numeric DL formula and it is UNSAT because the following three constraints are contradicting.
+If you sum them up you'll get the following inequality which is of course UNSAT.
+Since this inequality is derived from the original DL constraints, phi_3 is UNSAT.
+Later I'll show you how one can detect such a cotradicting set of constraints using the special constraint graph.
+
+
+
+PDF page 11-12
+Although, DL constraint must always contain exactly 2 variables, nevertheless it is possible to express inequalities with only one variable in DL.
+How? By introducing a special pseudo-variable zero.
+As you'll see later, this special variable zero does not change the SAT checking algorithm applied to a DL formula.
+The inequalities of type "greater-than" and "greater-or-equal-than" can be also expressed in DL.
+As well as inequalities and equalities.
+Consider the following constraint as an example.
+We want to express it in DL.
+So what do we do?
+First we negate the complementary constraint which is "v less than -3 OR v greater than -3.
+Then we multiply the second constraint by -1.
+And finally we introduce the special variable zero.
+As you can see the constraints of the final formula have exactly two variables and the signs are "strictly less than".
+
+
+
+PDF page 19
+One of the motivations behind the DL is the job scheduling problem.
+Suppose we have 2 machines and 4 jobs with known processing times tau (constants).
+We would like to schedule our 4 jobs on our 2 machines such that the overall processing time would not exceed T (constant).
+The problem can be formulated in DL.
+Notation: variables are blue e.g. t1, t3 and constants are black e.g. tau1, T.
+p are the propositional variables which show which job has been scheduled on which machine.
+t are numeric variables which denote the start time of each job.
+2 rules are important for us: overlap rule and general time constants rule.
+the first one states that if jobs i and j are both scheduled on machine m then job i must finish before j starts of, vice verse, job j must finish before i starts i.e. time-overlap on the same machine is not allowed.
+and the second rule just describes general time constraints that each job must finish before T.
+
+
+
+PDF page 20-23
+Bundling it all together:
+  Each task is executed on at least one machine
+  Each task can be scheduled on one machine only
+  General time constraints
+  No time overlap rule
+will give you the DL formula for the job scheduling problem.
+Once again: variables are blue and constants are black.
+You can verify that all the constants are either propositional logic constants or valid DL constraints.
+
+
+
+PDF page 24
+A couple of words about SAT checking of a propositional logic.
+It can be described as an intelligent search in the decision tree depicted on the right.
+The tree can be quite huge, therefore SAT checker learns additional asserting clauses which help to avoid whole subbranches of the tree where no solution exists.
+
+
+
+PDF page 25
+This is the basic SAT checking algorithm for propositional logic taken from the SAT checking lectures.
+It is also known as the DPLL algorithm.
+The algorithm solves SAT checking problem of the propositional logic.
+How do we solve SAT of a DL formula then?
+
+
+
+PDF page 26
+The answer is: we combine SAT checker with a theory solver.
+SAT checker hanles the propositional part i.e. the boolean skeleton and theory solver handles theory constraints.
+There are 2 approaches of combining SAT checker with theory solver: lazy and incremental.
+In the lectures lazy is called the full lazy approach and incremental is called the less lazy approach.
+On the slide the full lazy approach is presented when the theory solver always receives the full solution.
+
+
+
+PDF page 27
+This slide depicts the less lazy or incremental appoach when the theory solver receives a partial solution.
+Now, let's take a look inside the theory solver component which, in our case, is responsible for solving SAT problem of a conjunction of DL constraints.
+Why exactly a conjunction?
+Because a SAT checker's partial solution corresponds to a set of constraints which needs to be satisfied together.
+And "together" means the AND operator i.e. a conjunction of the constraints.
+
+
+
+PDF page 28
+As I've mentioned earlier, the SAT problem of a conjunction of DL constraints can be transformed to a graph problem.
+We need to build a special constraint graph for a given set of DL constraints and try find a negative cycle in it.
+If we do find a negative cycle then the given set of constraints are UNSAT and the constraints constituting the cycle form the explanation for the SAT checker.
+E.g. in the graph on the right, the red inequalities form the explanation because they imply the inequality "0 < -2".
+The constraint graph is fairly easy to construct.
+You map each variable to a vertex and each inequality to an edge between the two variables.
+The weights of edges equal to the corresponding constants.
+Note that the graph is directed!
+
+
+
+PDF page 29
+Now, how do you find a negate cycle in a graph?
+Well, the first idea is to check all the cycles and for each of them check if it is conflicting or not.
+A cycle can also have a zero weight and correspond to a conflict "0 < 0" if at least one of the edges correspond to a strict equality.
+
+
+
+PDF page 30
+However, this is a bad idea because a graph can have exponentially many cycles.
+Is there a better approach?
+
+
+
+PDF page 31-34
+It turns out, there is and it is based on the Bellman-Ford algorithm.
+Given a directed weighted graph Gamma (which is allowed to have negative edges) and a source vertex s, Bellman-Ford algorithm calculates distances from the given source vertex to all the other ones.
+It also returns True iff there is no negative cycles in the given graph.
+Let me show you in more details how the algorithm works.
+First of all, the algorithm initializes the distance estimates: distance to all the vertices equals infinity except for the source vertex, for which it is zero.
+Then the algorithm tries to relax each edge |V|-1 times.
+The blue code is called edge relaxation operation.
+It is basically the update operation of a distance estimate of vertex y by using vertex x and edge (x;y).
+Why exactly |V|-1 times?
+Because it is the maximal number of edges which may constitute a path from one vertex to another one.
+We have to assume the worst possible case i.e. that there might be a path from the source to some vertex x which has the maximal number of edges.
+Therefore, in order to guarantee that the distance estimate for this "worst-case" path converges, we have to relax each edge |V|-1 times.
+More details on that are given in "Introduction to Algorithms", chapter 24
+As the last step, the algorithm does an extra edge relaxation loop.
+If the extra edge relaxation is possible for any edge then there is a negative cycle in the given graph.
+And if no update is possible then there are no negative cycles.
+
+
+
+PDF page 35
+The main paper, on which my report is based, during the run of Bellman-Ford algorithm uses the dynamic admissible graph Gamma_d to check if there is a negative cycle in the graph.
+This graph consists of admissible edges which are the edges that can potentially be used to improve distance estimates.
+The graph, as I've mentioned, is dynamic because its' set of edges depends on the current distance estimates which change during the run of Bellman-Ford algorithm.
+
+
+
+PDF page 36
+The approach present in the paper of Cotton et.al. is based on the following theorem.
+Given a constraint graph Gamma and a series of distance estimating functions (d0, d1, d2, d3, ...), Gamma has a negative or zero cycle if and only if Gamma_d has a cycle under some distance estimate dk.
+The proof is quite long.
+You can read it in the original paper.
+The intuition behind the theorem is that if Gamma_d has a cycle then this cycle might be used to update d infinitely i.e. the edge relaxation process will never converge which is only possible when Gamma has a negative cycle.
+
+
+
+PDF page 37
+PDF page 38
+PDF page 39
+PDF page 40
+
+
+
+PDF page 41
+Thank you for your attention
+Feel free to ask me questions on the presented topic.
