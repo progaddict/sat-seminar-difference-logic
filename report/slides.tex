@@ -105,7 +105,7 @@
         \frametitle{Difference Logic}
         \begin{itemize}
             \item Difference logic -- a special case of
-            linear arithmetic logic,
+            \textcolor{blue}{linear arithmetic logic},
             \item in which constraints have the following form:
             \begin{equation*}
                 x - y \prec c
@@ -134,16 +134,6 @@
         \begin{equation*}
             \begin{aligned}
                 \phi_2 &= (u-v < 1) \land (v-w < 5) \\
-                & \land (w-x \leq -3) \land (x-y < 1) \\
-                & \land (y-z \leq -5) \land (y-v \leq 0) \\
-            \end{aligned}
-        \end{equation*}
-        \pause
-        \textcolor{blue}{SAT} $ u=0, v=3, w=0, x=3, y=3, z=8 $
-        \pause
-        \begin{equation*}
-            \begin{aligned}
-                \phi_3 &= (u-v < 1) \land (v-w < 5) \\
                 & \land (w-x \leq -3) \land (x-y < -3) \\
                 & \land (y-z \leq -5) \land (y-w < 4) \\
             \end{aligned}
@@ -581,7 +571,8 @@
                 (can be selected \eg randomly)
                 \item $ \Gamma = (V,E,weight) $ -- directed graph
                 \item $ d \in V \mapsto \mathbb{R} $ -- distance estimate function
-                \item Note: the algorithm runs once for the whole graph,
+                \item Note: the algorithm runs
+                \textcolor{blue}{once for the whole graph},
                 not once for each vertex (\ie $ |V| $ times).
             \end{itemize}
         \end{itemize}
@@ -661,16 +652,18 @@
     \frametitle{Constraint Graph And Negative Cycles}
     \begin{theorem}
         \label{the:neg-cycle-in-cg}
-        Given a constraint graph $ \Gamma $ \\
-        and \\
-        a \textcolor{blue}{series} of distance estimating \\
+        \begin{center}
+            Given a constraint graph $ \Gamma $ \\
+            and \\
+            a \textcolor{blue}{series} of distance estimating \\
         functions $ (d_0, d_1, d_2, d_3, \dots) $, \\
         $ \Gamma $ has a negative or zero cycle \\
-        if and only if \\
+        $ \Leftrightarrow $ \\
         \textcolor{blue}{
             $ \Gamma_d $ has a cycle under some
             distance estimate $ d_k $.
         }
+        \end{center}
         \begin{proof}
             see~\textcolor{blue}{[Cotton~\etal~2004]}.
         \end{proof}
@@ -704,7 +697,7 @@
                         \draw [->] (x2) -- node[anchor=east] {-3} (x3);
                         \draw [->] (x3) -- node[anchor=north] {-1} (x4);
                         \draw [->] (x4) -- node[anchor=north] {-5} (x5);
-                        \draw [->] (x4) -- node[anchor=east] {-1} (x1);
+                        \draw [->] (x4) -- node[anchor=east] {-2} (x1);
                         \end{tikzpicture}
                     }
                 \caption{$ \Gamma $}
@@ -765,7 +758,7 @@
                         \draw [->] (x2) -- node[anchor=east] {-3} (x3);
                         \draw [->] (x3) -- node[anchor=north] {-1} (x4);
                         \draw [->] (x4) -- node[anchor=north] {-5} (x5);
-                        \draw [->] (x4) -- node[anchor=east] {-1} (x1);
+                        \draw [->] (x4) -- node[anchor=east] {-2} (x1);
                         \end{tikzpicture}
                     }
                     \caption{$ \Gamma $}
@@ -787,7 +780,7 @@
                         \draw [->] (x2) -- node[anchor=east] {0} (x3);
                         \draw [->, color=blue] (x3) -- node[anchor=north] {$ \textcolor{blue}{0} $} (x4);
                         \draw [->, color=blue] (x4) -- node[anchor=north] {$ \textcolor{blue}{-\infty} $} (x5);
-                        \draw [->, color=blue] (x4) -- node[anchor=east] {\textcolor{blue}{0}} (x1);
+                        \draw [->, color=blue] (x4) -- node[anchor=east] {\textcolor{blue}{-1}} (x1);
                         \end{tikzpicture}
                     }
                     \caption{$ \Gamma_d $}
@@ -800,12 +793,13 @@
         \begin{center}
             \begin{tabular}{c c c}
                 $ r(s,x_1) = 0 $ & $ r(x_1,x_2) = 0 $ & $ r(x_2,x_3) = 0 $ \\
-                $ \textcolor{blue}{r(x_3,x_4) = 0} $ & $ \textcolor{blue}{r(x_4,x_1) = 0} $ & $ \textcolor{blue}{r(x_4,x_5) = -\infty} $ \\
+                $ \textcolor{blue}{r(x_3,x_4) = 0} $ & $ \textcolor{blue}{r(x_4,x_1) = -1} $ & $ \textcolor{blue}{r(x_4,x_5) = -\infty} $ \\
             \end{tabular}
         \end{center}
         Now $ \Gamma_d $ has a cycle:
-        \textcolor{blue}{$ x_1 \rightarrow x_2 \rightarrow x_3 \rightarrow x_4 \rightarrow x_1 $}.
-        This cycle in $ \Gamma $ has indeed zero weight.
+        \textcolor{blue}{$ x_1 \rightarrow x_2 \rightarrow x_3 \rightarrow x_4 \rightarrow x_1 $}
+        and this cycle corresponds to the negative cycle
+        in $ \Gamma $.
     \end{frame}
 
 
@@ -846,28 +840,25 @@
         \begin{itemize}
             \item Many timing problems (logistics, planning, scheduling,
             circuits checking) can be expressed in DL.
-            Therefore it is important to have an efficient algorithm
-            for checking SAT of a DL formula.
             \item Conjunction of DL constraints can be represented
-            by a constraint graph $ \Gamma $.
+            by a constraint graph \textcolor{blue}{$ \Gamma $}.
             \begin{itemize}
-                \item A negative cycle corresponds to a conflict
-                $ 0 \prec c $ \\
-                where \textcolor{blue}{$ c < 0 $}
-                and $ \prec \in \{ <, \le \} $
+                \item A negative cycle corresponds to a conflict \\
                 \eg \textcolor{blue}{$ 0 < -3 $},
-                \textcolor{blue}{$ 0 \le -1 $} \etc
+                \textcolor{blue}{$ 0 \le -1 $},
+                \textcolor{blue}{$ 0 < -5 $} \etc
                 \item A zero weight cycle with a
-                \textcolor{blue}{strict inequality}
-                edge corresponds to a conflict
-                \textcolor{blue}{$ 0 < 0 $}.
+                \textcolor{blue}{strict inequality} edge \\
+                corresponds to a conflict \textcolor{blue}{$ 0 < 0 $}.
             \end{itemize}
-            \item There is no need to enumerate all cycles in $ \Gamma $. \\
-            Bellman-Ford algorithm can be used to detect a negative
-            cycle in~\textcolor{blue}{$ O(|V| \cdot |E|) $} operations.
-            \item A cycle in admissible graph $ \Gamma_d $
-            corresponds to a negative or zero weight cycle in
-            the corresponding constraint graph $ \Gamma $.
+            \item Bellman-Ford algorithm in combination with
+            \textcolor{blue}{$ \Gamma_d $}
+            can be used to detect these conflicting cycles.
+            \begin{itemize}
+                \item A cycle in \textcolor{blue}{$ \Gamma_d $}
+                corresponds to a conflicting cycle in
+                \textcolor{blue}{$ \Gamma $}.
+            \end{itemize}
         \end{itemize}
     \end{frame}
 
